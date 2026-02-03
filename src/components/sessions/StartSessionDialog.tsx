@@ -42,6 +42,7 @@ export function StartSessionDialog({
   const [playerCount, setPlayerCount] = useState<2 | 4>(2);
   const [players, setPlayers] = useState<string[]>(["", ""]);
   const [guestInputs, setGuestInputs] = useState<string[]>(["", "", "", ""]);
+  const [isGuest, setIsGuest] = useState<boolean[]>([false, false, false, false]);
 
   const handlePlayerCountChange = (count: string) => {
     const newCount = parseInt(count) as 2 | 4;
@@ -55,16 +56,20 @@ export function StartSessionDialog({
 
   const handlePlayerSelect = (index: number, value: string) => {
     const newPlayers = [...players];
+    const newIsGuest = [...isGuest];
+    
     if (value === "guest") {
-      // Use the guest input value
+      newIsGuest[index] = true;
       newPlayers[index] = guestInputs[index] || "";
     } else {
+      newIsGuest[index] = false;
       newPlayers[index] = value;
       // Clear guest input when selecting a customer
       const newGuestInputs = [...guestInputs];
       newGuestInputs[index] = "";
       setGuestInputs(newGuestInputs);
     }
+    setIsGuest(newIsGuest);
     setPlayers(newPlayers);
   };
 
@@ -86,19 +91,15 @@ export function StartSessionDialog({
     // Reset state
     setPlayers(["", ""]);
     setGuestInputs(["", "", "", ""]);
+    setIsGuest([false, false, false, false]);
     setPlayerCount(2);
   };
 
-  const isPlayerGuest = (index: number) => {
-    const playerName = players[index];
-    return playerName && !customers.some(c => c.name === playerName);
-  };
-
   const getSelectValue = (index: number) => {
+    if (isGuest[index]) return "guest";
     const playerName = players[index];
     if (!playerName) return "";
-    const customer = customers.find(c => c.name === playerName);
-    return customer ? customer.name : "guest";
+    return playerName;
   };
 
   return (
@@ -162,7 +163,7 @@ export function StartSessionDialog({
                       ))}
                     </SelectContent>
                   </Select>
-                  {players[index] && (
+                  {(players[index] || isGuest[index]) && (
                     <Button
                       type="button"
                       variant="ghost"
@@ -175,13 +176,16 @@ export function StartSessionDialog({
                         const newGuestInputs = [...guestInputs];
                         newGuestInputs[index] = "";
                         setGuestInputs(newGuestInputs);
+                        const newIsGuest = [...isGuest];
+                        newIsGuest[index] = false;
+                        setIsGuest(newIsGuest);
                       }}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
-                {getSelectValue(index) === "guest" && (
+                {isGuest[index] && (
                   <Input
                     placeholder="Enter guest name..."
                     value={guestInputs[index]}
