@@ -179,12 +179,19 @@ export default function Payments() {
               <TableBody>
                 {payments.map((payment) => {
                   const Icon = paymentMethodIcons[payment.payment_method] || DollarSign;
+                  const displayName = payment.customers?.name || payment.payer_name || "Unknown";
+                  const isGuest = !payment.customers;
                   return (
                     <TableRow key={payment.id}>
                       <TableCell className="text-muted-foreground">
                         {format(new Date(payment.created_at), "MMM d, yyyy HH:mm")}
                       </TableCell>
-                      <TableCell className="font-medium">{payment.customers.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {displayName}
+                        {isGuest && (
+                          <Badge variant="outline" className="ml-2 text-xs">Guest</Badge>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="font-mono bg-success/10 text-success">
                           <DollarSign className="h-3 w-3" />

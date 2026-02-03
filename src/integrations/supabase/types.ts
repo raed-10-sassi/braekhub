@@ -51,27 +51,30 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
-          customer_id: string
+          customer_id: string | null
           id: string
           notes: string | null
+          payer_name: string | null
           payment_method: string
           session_id: string | null
         }
         Insert: {
           amount: number
           created_at?: string
-          customer_id: string
+          customer_id?: string | null
           id?: string
           notes?: string | null
+          payer_name?: string | null
           payment_method?: string
           session_id?: string | null
         }
         Update: {
           amount?: number
           created_at?: string
-          customer_id?: string
+          customer_id?: string | null
           id?: string
           notes?: string | null
+          payer_name?: string | null
           payment_method?: string
           session_id?: string | null
         }
