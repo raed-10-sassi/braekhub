@@ -87,7 +87,7 @@ export default function Tables() {
     });
   };
 
-  const handleConfirmEndSession = (paymentAmount: number) => {
+  const handleConfirmEndSession = (paymentAmount: number, payerName: string, paymentMethod: string, customerId?: string) => {
     if (!endSessionData) return;
 
     const remaining = endSessionData.totalAmount - paymentAmount;
@@ -98,17 +98,20 @@ export default function Tables() {
       totalAmount: endSessionData.totalAmount,
     });
 
-    if (paymentAmount > 0 && session) {
+    // Only create payment record if we have a valid customer ID
+    if (paymentAmount > 0 && customerId) {
       createPayment.mutate({
         session_id: endSessionData.sessionId,
-        customer_id: session.customer_id,
+        customer_id: customerId,
         amount: paymentAmount,
+        payment_method: paymentMethod,
       });
     }
 
-    if (remaining > 0 && session) {
+    // Only add credit if the payer is a registered customer
+    if (remaining > 0 && customerId) {
       addCreditToCustomer.mutate({
-        customerId: session.customer_id,
+        customerId: customerId,
         amount: remaining,
       });
     }
