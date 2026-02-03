@@ -91,18 +91,18 @@ export default function Tables() {
     if (!endSessionData) return;
 
     const remaining = endSessionData.totalAmount - paymentAmount;
-    const session = activeSessions.find((s) => s.id === endSessionData.sessionId);
 
     endSession.mutate({
       sessionId: endSessionData.sessionId,
       totalAmount: endSessionData.totalAmount,
     });
 
-    // Only create payment record if we have a valid customer ID
-    if (paymentAmount > 0 && customerId) {
+    // Create payment record for both customers and guests
+    if (paymentAmount > 0) {
       createPayment.mutate({
         session_id: endSessionData.sessionId,
         customer_id: customerId,
+        payer_name: payerName,
         amount: paymentAmount,
         payment_method: paymentMethod,
       });

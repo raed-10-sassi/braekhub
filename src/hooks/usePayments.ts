@@ -5,7 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 export interface Payment {
   id: string;
   session_id: string | null;
-  customer_id: string;
+  customer_id: string | null;
+  payer_name: string | null;
   amount: number;
   payment_method: string;
   notes: string | null;
@@ -13,7 +14,7 @@ export interface Payment {
 }
 
 export interface PaymentWithRelations extends Payment {
-  customers: { name: string };
+  customers: { name: string } | null;
   sessions: { id: string; total_amount: number } | null;
 }
 
@@ -28,7 +29,7 @@ export function usePayments() {
         .from("payments")
         .select(`
           *,
-          customers (name),
+          customers!left (name),
           sessions (id, total_amount)
         `)
         .order("created_at", { ascending: false });
@@ -41,7 +42,8 @@ export function usePayments() {
   const createPayment = useMutation({
     mutationFn: async (payment: {
       session_id?: string;
-      customer_id: string;
+      customer_id?: string;
+      payer_name?: string;
       amount: number;
       payment_method?: string;
       notes?: string;
