@@ -1,24 +1,38 @@
 import { useState } from "react";
-import { Plus, Settings2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTables, TableStatus } from "@/hooks/useTables";
-import { cn } from "@/lib/utils";
-
-const statusConfig: Record<TableStatus, { label: string; className: string }> = {
-  available: { label: "Available", className: "bg-success text-success-foreground" },
-  occupied: { label: "Occupied", className: "bg-destructive text-destructive-foreground" },
-  maintenance: { label: "Maintenance", className: "bg-warning text-warning-foreground" },
-};
+import { useSessions } from "@/hooks/useSessions";
+import { useCustomers } from "@/hooks/useCustomers";
+import { usePayments } from "@/hooks/usePayments";
+import { TableCard } from "@/components/tables/TableCard";
+import { StartSessionDialog } from "@/components/sessions/StartSessionDialog";
+import { EndSessionDialog } from "@/components/sessions/EndSessionDialog";
+import { differenceInMinutes } from "date-fns";
 
 export default function Tables() {
   const { tables, isLoading, updateTableStatus, createTable } = useTables();
+  const { activeSessions, startSession, endSession } = useSessions();
+  const { customers } = useCustomers();
+  const { createPayment, addCreditToCustomer } = usePayments();
+
   const [newTableOpen, setNewTableOpen] = useState(false);
+  const [startSessionTableId, setStartSessionTableId] = useState<string | null>(null);
+  const [endSessionData, setEndSessionData] = useState<{
+    sessionId: string;
+    totalAmount: number;
+    playerNames: string[];
+  } | null>(null);
+
+  const startSessionTable = tables.find((t) => t.id === startSessionTableId);
+
+  const getActiveSessionForTable = (tableId: string) => {
+    return activeSessions.find((s) => s.table_id === tableId);
+  };
 
   const handleCreateTable = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,6 +48,72 @@ export default function Tables() {
 
   const handleStatusChange = (tableId: string, status: TableStatus) => {
     updateTableStatus.mutate({ id: tableId, status });
+  };
+
+  const handleStartSession = (playerNames: string[], playerCount: number) => {
+    if (!startSessionTable) return;
+    
+    // Use a default customer_id (first customer or create a placeholder)
+    // Since billing is "any player can pay", we don't tie it to a specific customer at start
+    const defaultCustomer = customers[0];
+    
+    if (!defaultCustomer) {
+      // Can't start without at least one customer in the system for now
+      return;
+    }
+
+    startSession.mutate({
+      table_id: startSessionTable.id,
+      customer_id: defaultCustomer.id,
+      hourly_rate: startSessionTable.hourly_rate,
+      player_count: playerCount,
+      player_names: playerNames,
+    });
+    setStartSessionTableId(null);
+  };
+
+  const handleEndSessionClick = (tableId: string) => {
+    const session = getActiveSessionForTable(tableId);
+    if (!session) return;
+
+    const minutes = differenceInMinutes(new Date(), new Date(session.start_time));
+    const hours = minutes / 60;
+    const totalAmount = Math.ceil(hours * session.hourly_rate * 100) / 100;
+
+    setEndSessionData({
+      sessionId: session.id,
+      totalAmount,
+      playerNames: session.player_names || [],
+    });
+  };
+
+  const handleConfirmEndSession = (paymentAmount: number) => {
+    if (!endSessionData) return;
+
+    const remaining = endSessionData.totalAmount - paymentAmount;
+    const session = activeSessions.find((s) => s.id === endSessionData.sessionId);
+
+    endSession.mutate({
+      sessionId: endSessionData.sessionId,
+      totalAmount: endSessionData.totalAmount,
+    });
+
+    if (paymentAmount > 0 && session) {
+      createPayment.mutate({
+        session_id: endSessionData.sessionId,
+        customer_id: session.customer_id,
+        amount: paymentAmount,
+      });
+    }
+
+    if (remaining > 0 && session) {
+      addCreditToCustomer.mutate({
+        customerId: session.customer_id,
+        amount: remaining,
+      });
+    }
+
+    setEndSessionData(null);
   };
 
   return (
@@ -87,50 +167,39 @@ export default function Tables() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {tables.map((table) => (
-            <Card key={table.id} className="relative overflow-hidden">
-              <div
-                className={cn(
-                  "absolute top-0 left-0 right-0 h-1",
-                  table.status === "available" && "bg-success",
-                  table.status === "occupied" && "bg-destructive",
-                  table.status === "maintenance" && "bg-warning"
-                )}
-              />
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{table.name}</CardTitle>
-                  <Badge className={statusConfig[table.status].className}>
-                    {statusConfig[table.status].label}
-                  </Badge>
-                </div>
-                <CardDescription>Table #{table.table_number}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold">${table.hourly_rate.toFixed(2)}</p>
-                    <p className="text-xs text-muted-foreground">per hour</p>
-                  </div>
-                  <Select
-                    value={table.status}
-                    onValueChange={(value) => handleStatusChange(table.id, value as TableStatus)}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <Settings2 className="h-4 w-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="available">Available</SelectItem>
-                      <SelectItem value="occupied">Occupied</SelectItem>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
+            <TableCard
+              key={table.id}
+              table={table}
+              activeSession={getActiveSessionForTable(table.id)}
+              onStatusChange={(status) => handleStatusChange(table.id, status)}
+              onStartSession={() => setStartSessionTableId(table.id)}
+              onEndSession={() => handleEndSessionClick(table.id)}
+            />
           ))}
         </div>
       )}
+
+      {/* Start Session Dialog */}
+      {startSessionTable && (
+        <StartSessionDialog
+          open={!!startSessionTableId}
+          onOpenChange={(open) => !open && setStartSessionTableId(null)}
+          tableName={startSessionTable.name}
+          tableId={startSessionTable.id}
+          hourlyRate={startSessionTable.hourly_rate}
+          onStart={handleStartSession}
+          isPending={startSession.isPending}
+        />
+      )}
+
+      {/* End Session Dialog */}
+      <EndSessionDialog
+        open={!!endSessionData}
+        onOpenChange={(open) => !open && setEndSessionData(null)}
+        totalAmount={endSessionData?.totalAmount || 0}
+        playerNames={endSessionData?.playerNames || []}
+        onConfirm={handleConfirmEndSession}
+      />
     </div>
   );
 }

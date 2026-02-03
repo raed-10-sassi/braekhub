@@ -125,6 +125,7 @@ export type Database = {
           id: string
           notes: string | null
           player_count: number
+          player_names: string[]
           start_time: string
           status: Database["public"]["Enums"]["session_status"]
           table_id: string
@@ -139,6 +140,7 @@ export type Database = {
           id?: string
           notes?: string | null
           player_count?: number
+          player_names?: string[]
           start_time?: string
           status?: Database["public"]["Enums"]["session_status"]
           table_id: string
@@ -153,6 +155,7 @@ export type Database = {
           id?: string
           notes?: string | null
           player_count?: number
+          player_names?: string[]
           start_time?: string
           status?: Database["public"]["Enums"]["session_status"]
           table_id?: string
