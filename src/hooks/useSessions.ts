@@ -17,6 +17,7 @@ export interface Session {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  player_names: string[];
 }
 
 export interface SessionWithRelations extends Session {
@@ -69,6 +70,7 @@ export function useSessions() {
       customer_id: string;
       hourly_rate: number;
       player_count: number;
+      player_names: string[];
       notes?: string;
     }) => {
       // First update table status

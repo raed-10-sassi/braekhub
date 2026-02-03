@@ -73,12 +73,15 @@ export default function Sessions() {
     const formData = new FormData(e.currentTarget);
     const tableId = formData.get("table_id") as string;
     const table = tables.find((t) => t.id === tableId);
+    const customerId = formData.get("customer_id") as string;
+    const customer = customers.find((c) => c.id === customerId);
 
     startSession.mutate({
       table_id: tableId,
-      customer_id: formData.get("customer_id") as string,
+      customer_id: customerId,
       hourly_rate: table?.hourly_rate || 15,
       player_count: parseInt(formData.get("player_count") as string) || 2,
+      player_names: customer ? [customer.name] : [],
     });
     setStartSessionOpen(false);
   };
