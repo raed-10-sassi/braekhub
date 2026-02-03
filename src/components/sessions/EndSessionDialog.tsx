@@ -118,23 +118,34 @@ export function EndSessionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="payment">Payment Amount</Label>
+            <Label htmlFor="payment">Payment Amount (0 - ${totalAmount.toFixed(2)})</Label>
             <Input
               id="payment"
               type="number"
               step="0.01"
+              min="0"
+              max={totalAmount}
               value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                const clamped = Math.min(Math.max(0, value), totalAmount);
+                setPaymentAmount(clamped.toString());
+              }}
             />
+            <p className="text-xs text-muted-foreground">
+              Enter the amount the customer is paying now
+            </p>
           </div>
 
           {remaining > 0.01 && (
-            <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
-              <p className="text-sm text-warning-foreground">
-                Remaining ${remaining.toFixed(2)} will be added as credit
+            <div className="p-3 bg-accent/50 border border-border rounded-lg">
+              <p className="text-sm font-medium text-foreground">
+                Remaining: ${remaining.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
                 {getPayerCustomer(selectedPayer) 
-                  ? ` to ${selectedPayer}'s account.`
-                  : ". Note: Guest players cannot store credit."
+                  ? `This will be added to ${selectedPayer}'s credit balance for future payment.`
+                  : "⚠️ Guest players cannot store credit. Only registered customers can have credit balance."
                 }
               </p>
             </div>
