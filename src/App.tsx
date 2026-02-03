@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Tables from "./pages/Tables";
-import Sessions from "./pages/Sessions";
 import Customers from "./pages/Customers";
 import Payments from "./pages/Payments";
 import Credits from "./pages/Credits";
@@ -40,14 +39,6 @@ const App = () => (
               element={
                 <AppLayout>
                   <Tables />
-                </AppLayout>
-              }
-            />
-            <Route
-              path="/sessions"
-              element={
-                <AppLayout>
-                  <Sessions />
                 </AppLayout>
               }
             />

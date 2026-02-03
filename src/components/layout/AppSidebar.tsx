@@ -30,7 +30,6 @@ import { cn } from "@/lib/utils";
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tables", url: "/tables", icon: Grid3X3 },
-  { title: "Sessions", url: "/sessions", icon: Clock },
   { title: "Customers", url: "/customers", icon: Users },
 ];
 
