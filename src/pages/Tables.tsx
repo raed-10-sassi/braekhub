@@ -50,22 +50,19 @@ export default function Tables() {
     updateTableStatus.mutate({ id: tableId, status });
   };
 
-  const handleStartSession = (playerNames: string[], playerCount: number) => {
+  const handleStartSession = (playerNames: string[], playerCount: number, effectiveRate: number) => {
     if (!startSessionTable) return;
     
-    // Use a default customer_id (first customer or create a placeholder)
-    // Since billing is "any player can pay", we don't tie it to a specific customer at start
     const defaultCustomer = customers[0];
     
     if (!defaultCustomer) {
-      // Can't start without at least one customer in the system for now
       return;
     }
 
     startSession.mutate({
       table_id: startSessionTable.id,
       customer_id: defaultCustomer.id,
-      hourly_rate: startSessionTable.hourly_rate,
+      hourly_rate: effectiveRate,
       player_count: playerCount,
       player_names: playerNames,
     });
