@@ -12,6 +12,7 @@ import Tables from "./pages/Tables";
 import Customers from "./pages/Customers";
 import Payments from "./pages/Payments";
 import Credits from "./pages/Credits";
+import Consumptions from "./pages/Consumptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,14 @@ const App = () => (
               element={
                 <AppLayout>
                   <Credits />
+                </AppLayout>
+              }
+            />
+            <Route
+              path="/consumptions"
+              element={
+                <AppLayout>
+                  <Consumptions />
                 </AppLayout>
               }
             />
