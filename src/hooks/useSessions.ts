@@ -18,6 +18,8 @@ export interface Session {
   created_at: string;
   updated_at: string;
   player_names: string[];
+  paused_at: string | null;
+  total_paused_seconds: number;
 }
 
 export interface SessionWithRelations extends Session {
@@ -109,6 +111,57 @@ export function useSessions() {
     },
   });
 
+  const pauseSession = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const { error } = await supabase
+        .from("sessions")
+        .update({ paused_at: new Date().toISOString() })
+        .eq("id", sessionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      toast({ title: "Session paused", description: "Timer has been paused." });
+    },
+    onError: (error) => {
+      toast({ title: "Error pausing session", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const resumeSession = useMutation({
+    mutationFn: async (sessionId: string) => {
+      // Get the session to calculate paused duration
+      const { data: session } = await supabase
+        .from("sessions")
+        .select("paused_at, total_paused_seconds")
+        .eq("id", sessionId)
+        .single();
+
+      if (!session?.paused_at) throw new Error("Session is not paused");
+
+      const pausedSeconds = Math.floor(
+        (new Date().getTime() - new Date(session.paused_at).getTime()) / 1000
+      );
+
+      const { error } = await supabase
+        .from("sessions")
+        .update({
+          paused_at: null,
+          total_paused_seconds: (session.total_paused_seconds || 0) + pausedSeconds,
+        })
+        .eq("id", sessionId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      toast({ title: "Session resumed", description: "Timer has been resumed." });
+    },
+    onError: (error) => {
+      toast({ title: "Error resuming session", description: error.message, variant: "destructive" });
+    },
+  });
+
   const endSession = useMutation({
     mutationFn: async ({ sessionId, totalAmount }: { sessionId: string; totalAmount: number }) => {
       // Get session to update table
@@ -131,6 +184,7 @@ export function useSessions() {
           status: "completed",
           end_time: new Date().toISOString(),
           total_amount: totalAmount,
+          paused_at: null,
         })
         .eq("id", sessionId);
 
@@ -170,6 +224,8 @@ export function useSessions() {
     isLoading: sessionsQuery.isLoading,
     error: sessionsQuery.error,
     startSession,
+    pauseSession,
+    resumeSession,
     endSession,
     refetch: sessionsQuery.refetch,
   };

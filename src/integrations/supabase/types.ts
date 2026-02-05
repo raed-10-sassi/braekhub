@@ -127,12 +127,14 @@ export type Database = {
           hourly_rate: number
           id: string
           notes: string | null
+          paused_at: string | null
           player_count: number
           player_names: string[]
           start_time: string
           status: Database["public"]["Enums"]["session_status"]
           table_id: string
           total_amount: number
+          total_paused_seconds: number
           updated_at: string
         }
         Insert: {
@@ -142,12 +144,14 @@ export type Database = {
           hourly_rate: number
           id?: string
           notes?: string | null
+          paused_at?: string | null
           player_count?: number
           player_names?: string[]
           start_time?: string
           status?: Database["public"]["Enums"]["session_status"]
           table_id: string
           total_amount?: number
+          total_paused_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -157,12 +161,14 @@ export type Database = {
           hourly_rate?: number
           id?: string
           notes?: string | null
+          paused_at?: string | null
           player_count?: number
           player_names?: string[]
           start_time?: string
           status?: Database["public"]["Enums"]["session_status"]
           table_id?: string
           total_amount?: number
+          total_paused_seconds?: number
           updated_at?: string
         }
         Relationships: [

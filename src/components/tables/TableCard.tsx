@@ -1,4 +1,4 @@
-import { Play, Square, Clock, Users, Settings2 } from "lucide-react";
+import { Play, Square, Clock, Users, Settings2, Pause, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TableStatus } from "@/hooks/useTables";
 import { SessionWithRelations } from "@/hooks/useSessions";
-import { differenceInMinutes } from "date-fns";
+import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import { useState, useEffect } from "react";
 
 const statusConfig: Record<TableStatus, { label: string; className: string }> = {
@@ -32,24 +32,30 @@ interface TableCardProps {
   activeSession?: SessionWithRelations & { player_names?: string[] };
   onStatusChange: (status: TableStatus) => void;
   onStartSession: () => void;
+  onPauseSession: () => void;
+  onResumeSession: () => void;
   onEndSession: () => void;
 }
 
-function ActiveTimer({ startTime }: { startTime: string }) {
+function ActiveTimer({ startTime, pausedAt, totalPausedSeconds }: { startTime: string; pausedAt?: string | null; totalPausedSeconds?: number }) {
   const [, setTick] = useState(0);
 
   useEffect(() => {
+    if (pausedAt) return; // Don't tick when paused
     const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [pausedAt]);
 
-  const minutes = differenceInMinutes(new Date(), new Date(startTime));
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+  const now = pausedAt ? new Date(pausedAt) : new Date();
+  const totalSeconds = differenceInSeconds(now, new Date(startTime)) - (totalPausedSeconds || 0);
+  const displayMinutes = Math.max(0, Math.floor(totalSeconds / 60));
+  const hours = Math.floor(displayMinutes / 60);
+  const mins = displayMinutes % 60;
 
   return (
-    <span className="font-mono text-lg font-bold text-destructive">
+    <span className={cn("font-mono text-lg font-bold", pausedAt ? "text-warning" : "text-destructive")}>
       {hours.toString().padStart(2, "0")}:{mins.toString().padStart(2, "0")}
+      {pausedAt && <span className="text-xs ml-1 animate-pulse">⏸</span>}
     </span>
   );
 }
@@ -59,6 +65,8 @@ export function TableCard({
   activeSession,
   onStatusChange,
   onStartSession,
+  onPauseSession,
+  onResumeSession,
   onEndSession,
 }: TableCardProps) {
   const isOccupied = table.status === "occupied" && activeSession;
@@ -114,7 +122,7 @@ export function TableCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <ActiveTimer startTime={activeSession.start_time} />
+                <ActiveTimer startTime={activeSession.start_time} pausedAt={activeSession.paused_at} totalPausedSeconds={activeSession.total_paused_seconds} />
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Users className="h-4 w-4" />
@@ -140,10 +148,23 @@ export function TableCard({
             </Button>
           )}
           {isOccupied && (
-            <Button variant="destructive" className="flex-1" onClick={onEndSession}>
-              <Square className="h-4 w-4 mr-2" />
-              End Session
-            </Button>
+            <>
+              {activeSession.paused_at ? (
+                <Button variant="outline" className="flex-1" onClick={onResumeSession}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Resume
+                </Button>
+              ) : (
+                <Button variant="secondary" className="flex-1" onClick={onPauseSession}>
+                  <Pause className="h-4 w-4 mr-2" />
+                  Pause
+                </Button>
+              )}
+              <Button variant="destructive" className="flex-1" onClick={onEndSession}>
+                <Square className="h-4 w-4 mr-2" />
+                End
+              </Button>
+            </>
           )}
           {isMaintenance && (
             <Button
