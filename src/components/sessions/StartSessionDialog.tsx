@@ -25,7 +25,7 @@ interface StartSessionDialogProps {
   tableName: string;
   tableId: string;
   hourlyRate: number;
-  onStart: (playerNames: string[], playerCount: number) => void;
+  onStart: (playerNames: string[], playerCount: number, effectiveRate: number) => void;
   isPending?: boolean;
 }
 
@@ -39,18 +39,22 @@ export function StartSessionDialog({
   isPending,
 }: StartSessionDialogProps) {
   const { customers } = useCustomers();
-  const [playerCount, setPlayerCount] = useState<2 | 4>(2);
+  const [playerCount, setPlayerCount] = useState<1 | 2 | 4>(2);
   const [players, setPlayers] = useState<string[]>(["", ""]);
   const [guestInputs, setGuestInputs] = useState<string[]>(["", "", "", ""]);
   const [isGuest, setIsGuest] = useState<boolean[]>([false, false, false, false]);
+  const isTraining = playerCount === 1;
+  const effectiveRate = isTraining ? hourlyRate / 2 : hourlyRate;
 
   const handlePlayerCountChange = (count: string) => {
-    const newCount = parseInt(count) as 2 | 4;
+    const newCount = parseInt(count) as 1 | 2 | 4;
     setPlayerCount(newCount);
-    if (newCount === 2) {
-      setPlayers(players.slice(0, 2));
+    if (newCount === 1) {
+      setPlayers(players.slice(0, 1));
+    } else if (newCount === 2) {
+      setPlayers([...players, ""].slice(0, 2));
     } else {
-      setPlayers([...players, "", ""].slice(0, 4));
+      setPlayers([...players, "", "", ""].slice(0, 4));
     }
   };
 
@@ -87,13 +91,14 @@ export function StartSessionDialog({
   const handleSubmit = () => {
     const validPlayers = players.slice(0, playerCount).filter(p => p.trim() !== "");
     if (validPlayers.length === 0) return;
-    onStart(validPlayers, playerCount);
+    onStart(validPlayers, playerCount, effectiveRate);
     // Reset state
     setPlayers(["", ""]);
     setGuestInputs(["", "", "", ""]);
     setIsGuest([false, false, false, false]);
     setPlayerCount(2);
   };
+
 
   const getSelectValue = (index: number) => {
     if (isGuest[index]) return "guest";
@@ -115,8 +120,22 @@ export function StartSessionDialog({
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <span className="text-sm text-muted-foreground">Rate:</span>
-            <span className="font-bold">${hourlyRate.toFixed(2)}/hr</span>
+            <div className="text-right">
+              {isTraining ? (
+                <>
+                  <span className="font-bold">${(hourlyRate / 2).toFixed(2)}/hr</span>
+                  <span className="text-xs text-muted-foreground ml-2 line-through">${hourlyRate.toFixed(2)}</span>
+                </>
+              ) : (
+                <span className="font-bold">${hourlyRate.toFixed(2)}/hr</span>
+              )}
+            </div>
           </div>
+          {isTraining && (
+            <div className="p-2 bg-accent/50 border border-border rounded-lg text-center">
+              <span className="text-sm font-medium">🎯 Training Mode — 50% Rate</span>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Number of Players</Label>
@@ -128,6 +147,7 @@ export function StartSessionDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="1">1 Player (Training)</SelectItem>
                 <SelectItem value="2">2 Players (1v1)</SelectItem>
                 <SelectItem value="4">4 Players (2v2)</SelectItem>
               </SelectContent>

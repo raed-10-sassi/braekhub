@@ -118,7 +118,9 @@ export function TableCard({
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Users className="h-4 w-4" />
-                <span>{activeSession.player_count}</span>
+                <span>
+                  {activeSession.player_count === 1 ? "Training" : activeSession.player_count}
+                </span>
               </div>
             </div>
             {activeSession.player_names && activeSession.player_names.length > 0 && (
