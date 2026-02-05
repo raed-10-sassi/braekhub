@@ -16,7 +16,7 @@ import { differenceInMinutes } from "date-fns";
 
 export default function Tables() {
   const { tables, isLoading, updateTableStatus, createTable } = useTables();
-  const { activeSessions, startSession, endSession } = useSessions();
+  const { activeSessions, startSession, pauseSession, resumeSession, endSession } = useSessions();
   const { customers } = useCustomers();
   const { createPayment, addCreditToCustomer } = usePayments();
 
@@ -73,8 +73,16 @@ export default function Tables() {
     const session = getActiveSessionForTable(tableId);
     if (!session) return;
 
-    const minutes = differenceInMinutes(new Date(), new Date(session.start_time));
-    const hours = minutes / 60;
+    // If currently paused, calculate paused seconds up to now
+    let totalPausedSeconds = session.total_paused_seconds || 0;
+    if (session.paused_at) {
+      totalPausedSeconds += Math.floor(
+        (new Date().getTime() - new Date(session.paused_at).getTime()) / 1000
+      );
+    }
+
+    const totalSeconds = differenceInMinutes(new Date(), new Date(session.start_time)) * 60 - totalPausedSeconds;
+    const hours = Math.max(0, totalSeconds) / 3600;
     const totalAmount = Math.ceil(hours * session.hourly_rate * 100) / 100;
 
     setEndSessionData({
@@ -173,6 +181,14 @@ export default function Tables() {
               activeSession={getActiveSessionForTable(table.id)}
               onStatusChange={(status) => handleStatusChange(table.id, status)}
               onStartSession={() => setStartSessionTableId(table.id)}
+              onPauseSession={() => {
+                const session = getActiveSessionForTable(table.id);
+                if (session) pauseSession.mutate(session.id);
+              }}
+              onResumeSession={() => {
+                const session = getActiveSessionForTable(table.id);
+                if (session) resumeSession.mutate(session.id);
+              }}
               onEndSession={() => handleEndSessionClick(table.id)}
             />
           ))}
