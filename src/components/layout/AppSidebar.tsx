@@ -7,7 +7,8 @@ import {
   Receipt, 
   LogOut,
   CircleDot,
-  Settings
+  Settings,
+  Coffee,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +32,7 @@ const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tables", url: "/tables", icon: Grid3X3 },
   { title: "Customers", url: "/customers", icon: Users },
+  { title: "Consumptions", url: "/consumptions", icon: Coffee },
 ];
 
 const financeNavItems = [
