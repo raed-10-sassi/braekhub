@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, Wallet } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,26 +20,33 @@ import {
 } from "@/components/ui/select";
 import { ProductWithCategory } from "@/hooks/useProducts";
 import { CartItem } from "@/hooks/useOrders";
+import { Customer } from "@/hooks/useCustomers";
 
 const PAYMENT_METHODS = [
   { value: "cash", label: "Cash" },
   { value: "card", label: "Card" },
   { value: "mobile", label: "Mobile Payment" },
+  { value: "credits", label: "Credits" },
 ];
 
 interface NewOrderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   products: ProductWithCategory[];
-  onConfirm: (data: { customerName: string; paymentMethod: string; items: CartItem[] }) => void;
+  customers: Customer[];
+  onConfirm: (data: { customerName: string; paymentMethod: string; items: CartItem[]; customerId?: string }) => void;
   isPending: boolean;
 }
 
-export function NewOrderDialog({ open, onOpenChange, products, onConfirm, isPending }: NewOrderDialogProps) {
+export function NewOrderDialog({ open, onOpenChange, products, customers, onConfirm, isPending }: NewOrderDialogProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerName, setCustomerName] = useState("");
+  const [customerId, setCustomerId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [search, setSearch] = useState("");
+
+  const selectedCustomer = customers.find((c) => c.id === customerId);
+  const isCredits = paymentMethod === "credits";
 
   const availableProducts = products.filter(
     (p) => p.stock_quantity > 0 && p.name.toLowerCase().includes(search.toLowerCase())
@@ -68,11 +75,20 @@ export function NewOrderDialog({ open, onOpenChange, products, onConfirm, isPend
 
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
+  const insufficientCredits = isCredits && selectedCustomer && selectedCustomer.credit_balance < total;
+  const canConfirm = cart.length > 0 && (!isCredits || (customerId && !insufficientCredits));
+
   const handleConfirm = () => {
-    if (cart.length === 0) return;
-    onConfirm({ customerName: customerName.trim(), paymentMethod, items: cart });
+    if (!canConfirm) return;
+    onConfirm({
+      customerName: isCredits ? (selectedCustomer?.name || "") : customerName.trim(),
+      paymentMethod,
+      items: cart,
+      customerId: isCredits ? customerId : undefined,
+    });
     setCart([]);
     setCustomerName("");
+    setCustomerId("");
     setPaymentMethod("cash");
     setSearch("");
     onOpenChange(false);
@@ -82,8 +98,16 @@ export function NewOrderDialog({ open, onOpenChange, products, onConfirm, isPend
     if (!newOpen) {
       setCart([]);
       setSearch("");
+      setCustomerId("");
     }
     onOpenChange(newOpen);
+  };
+
+  const handlePaymentChange = (value: string) => {
+    setPaymentMethod(value);
+    if (value !== "credits") {
+      setCustomerId("");
+    }
   };
 
   return (
@@ -177,16 +201,8 @@ export function NewOrderDialog({ open, onOpenChange, products, onConfirm, isPend
           {/* Customer & Payment */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Customer Name (optional)</Label>
-              <Input
-                placeholder="Guest"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
               <Label>Payment Method</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <Select value={paymentMethod} onValueChange={handlePaymentChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -197,6 +213,44 @@ export function NewOrderDialog({ open, onOpenChange, products, onConfirm, isPend
                 </SelectContent>
               </Select>
             </div>
+            {isCredits ? (
+              <div className="space-y-2">
+                <Label>Select Customer</Label>
+                <Select value={customerId} onValueChange={setCustomerId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose customer..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.filter((c) => c.credit_balance > 0).map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} — ${c.credit_balance.toFixed(2)}
+                      </SelectItem>
+                    ))}
+                    {customers.filter((c) => c.credit_balance > 0).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">No customers with credits</div>
+                    )}
+                  </SelectContent>
+                </Select>
+                {selectedCustomer && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Wallet className="h-3 w-3" />
+                    <span>Balance: <span className="font-bold">${selectedCustomer.credit_balance.toFixed(2)}</span></span>
+                    {insufficientCredits && (
+                      <Badge variant="destructive" className="text-xs">Insufficient</Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Customer Name (optional)</Label>
+                <Input
+                  placeholder="Guest"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 pt-2">
@@ -206,7 +260,7 @@ export function NewOrderDialog({ open, onOpenChange, products, onConfirm, isPend
             <Button
               className="flex-1"
               onClick={handleConfirm}
-              disabled={isPending || cart.length === 0}
+              disabled={isPending || !canConfirm}
             >
               Confirm Sale — ${total.toFixed(2)}
             </Button>

@@ -52,12 +52,35 @@ export function useOrders() {
       customerName,
       paymentMethod,
       items,
+      customerId,
     }: {
       customerName: string;
       paymentMethod: string;
       items: CartItem[];
+      customerId?: string;
     }) => {
       const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+      // If paying with credits, verify and deduct customer balance
+      if (paymentMethod === "credits" && customerId) {
+        const { data: customer, error: customerError } = await supabase
+          .from("customers")
+          .select("credit_balance")
+          .eq("id", customerId)
+          .single();
+
+        if (customerError) throw customerError;
+        if (customer.credit_balance < totalAmount) {
+          throw new Error("Insufficient credit balance");
+        }
+
+        const { error: deductError } = await supabase
+          .from("customers")
+          .update({ credit_balance: customer.credit_balance - totalAmount })
+          .eq("id", customerId);
+
+        if (deductError) throw deductError;
+      }
 
       // Create order
       const { data: order, error: orderError } = await supabase
@@ -99,6 +122,7 @@ export function useOrders() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast({ title: "Order placed", description: "Sale has been recorded." });
     },
     onError: (error) => {
