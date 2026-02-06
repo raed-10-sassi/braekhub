@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { useProducts } from "@/hooks/useProducts";
 import { useOrders } from "@/hooks/useOrders";
+import { useCustomers } from "@/hooks/useCustomers";
 import { CategoryManager } from "@/components/consumptions/CategoryManager";
 import { ProductTable } from "@/components/consumptions/ProductTable";
 import { AddProductDialog } from "@/components/consumptions/AddProductDialog";
@@ -32,6 +33,7 @@ export default function Consumptions() {
     deleteProduct,
   } = useProducts();
   const { orders, isLoading: ordersLoading, createOrder } = useOrders();
+  const { customers } = useCustomers();
 
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
@@ -203,6 +205,7 @@ export default function Consumptions() {
         open={newOrderOpen}
         onOpenChange={setNewOrderOpen}
         products={products}
+        customers={customers}
         onConfirm={(data) => createOrder.mutate(data)}
         isPending={createOrder.isPending}
       />
