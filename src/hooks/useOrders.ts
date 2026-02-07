@@ -61,7 +61,7 @@ export function useOrders() {
     }) => {
       const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-      // If paying with credits, deduct from customer balance (can go negative = debt)
+      // If paying with credits, add to customer's credit balance (debt)
       if (paymentMethod === "credits" && customerId) {
         const { data: customer, error: customerError } = await supabase
           .from("customers")
@@ -71,12 +71,12 @@ export function useOrders() {
 
         if (customerError) throw customerError;
 
-        const { error: deductError } = await supabase
+        const { error: creditError } = await supabase
           .from("customers")
-          .update({ credit_balance: customer.credit_balance - totalAmount })
+          .update({ credit_balance: customer.credit_balance + totalAmount })
           .eq("id", customerId);
 
-        if (deductError) throw deductError;
+        if (creditError) throw creditError;
       }
 
       // Create order
