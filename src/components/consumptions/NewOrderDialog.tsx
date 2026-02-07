@@ -221,13 +221,13 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
                     <SelectValue placeholder="Choose customer..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {customers.filter((c) => c.credit_balance > 0).map((c) => (
+                    {customers.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name} — ${c.credit_balance.toFixed(2)}
                       </SelectItem>
                     ))}
-                    {customers.filter((c) => c.credit_balance > 0).length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">No customers with credits</div>
+                    {customers.length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">No customers available</div>
                     )}
                   </SelectContent>
                 </Select>
