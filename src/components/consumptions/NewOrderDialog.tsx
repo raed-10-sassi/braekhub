@@ -75,8 +75,8 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
 
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  const insufficientCredits = isCredits && selectedCustomer && selectedCustomer.credit_balance < total;
-  const canConfirm = cart.length > 0 && (!isCredits || (customerId && !insufficientCredits));
+  const willGoNegative = isCredits && selectedCustomer && selectedCustomer.credit_balance < total;
+  const canConfirm = cart.length > 0 && (!isCredits || !!customerId);
 
   const handleConfirm = () => {
     if (!canConfirm) return;
@@ -235,8 +235,8 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
                   <div className="flex items-center gap-2 text-xs">
                     <Wallet className="h-3 w-3" />
                     <span>Balance: <span className="font-bold">${selectedCustomer.credit_balance.toFixed(2)}</span></span>
-                    {insufficientCredits && (
-                      <Badge variant="destructive" className="text-xs">Insufficient</Badge>
+                    {willGoNegative && (
+                      <Badge variant="secondary" className="text-xs">Will be charged from credits</Badge>
                     )}
                   </div>
                 )}

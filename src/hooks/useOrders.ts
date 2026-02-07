@@ -61,7 +61,7 @@ export function useOrders() {
     }) => {
       const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-      // If paying with credits, verify and deduct customer balance
+      // If paying with credits, deduct from customer balance (can go negative = debt)
       if (paymentMethod === "credits" && customerId) {
         const { data: customer, error: customerError } = await supabase
           .from("customers")
@@ -70,9 +70,6 @@ export function useOrders() {
           .single();
 
         if (customerError) throw customerError;
-        if (customer.credit_balance < totalAmount) {
-          throw new Error("Insufficient credit balance");
-        }
 
         const { error: deductError } = await supabase
           .from("customers")
