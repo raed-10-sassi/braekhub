@@ -47,6 +47,7 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
   const isCredits = paymentMethod === "credits";
+  const isGuestCredit = isCredits && !customerId;
 
   const availableProducts = products.filter(
     (p) => p.stock_quantity > 0 && p.name.toLowerCase().includes(search.toLowerCase())
@@ -76,15 +77,15 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   const willGoNegative = isCredits && selectedCustomer && selectedCustomer.credit_balance < total;
-  const canConfirm = cart.length > 0 && (!isCredits || !!customerId);
+  const canConfirm = cart.length > 0 && (!isCredits || !!customerId || customerName.trim().length > 0);
 
   const handleConfirm = () => {
     if (!canConfirm) return;
     onConfirm({
-      customerName: isCredits ? (selectedCustomer?.name || "") : customerName.trim(),
+      customerName: selectedCustomer?.name || customerName.trim(),
       paymentMethod,
       items: cart,
-      customerId: isCredits ? customerId : undefined,
+      customerId: customerId || undefined,
     });
     setCart([]);
     setCustomerName("");
@@ -215,10 +216,10 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
             </div>
             {isCredits ? (
               <div className="space-y-2">
-                <Label>Select Customer</Label>
+                <Label>Customer</Label>
                 <Select value={customerId} onValueChange={setCustomerId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose customer..." />
+                    <SelectValue placeholder="Select or leave empty for new..." />
                   </SelectTrigger>
                   <SelectContent>
                     {customers.map((c) => (
@@ -226,11 +227,18 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
                         {c.name} — ${c.credit_balance.toFixed(2)}
                       </SelectItem>
                     ))}
-                    {customers.length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">No customers available</div>
-                    )}
                   </SelectContent>
                 </Select>
+                {!customerId && (
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">New guest name (will auto-register)</Label>
+                    <Input
+                      placeholder="Guest name..."
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                    />
+                  </div>
+                )}
                 {selectedCustomer && (
                   <div className="flex items-center gap-2 text-xs">
                     <Wallet className="h-3 w-3" />

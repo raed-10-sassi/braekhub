@@ -61,22 +61,37 @@ export function useOrders() {
     }) => {
       const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-      // If paying with credits, add to customer's credit balance (debt)
-      if (paymentMethod === "credits" && customerId) {
-        const { data: customer, error: customerError } = await supabase
-          .from("customers")
-          .select("credit_balance")
-          .eq("id", customerId)
-          .single();
+      // If paying with credits, track debt on customer record
+      if (paymentMethod === "credits") {
+        let resolvedCustomerId = customerId;
 
-        if (customerError) throw customerError;
+        // Auto-create customer if no existing one selected
+        if (!resolvedCustomerId && customerName) {
+          const { data: newCustomer, error: createError } = await supabase
+            .from("customers")
+            .insert({ name: customerName, credit_balance: totalAmount })
+            .select()
+            .single();
 
-        const { error: creditError } = await supabase
-          .from("customers")
-          .update({ credit_balance: customer.credit_balance + totalAmount })
-          .eq("id", customerId);
+          if (createError) throw createError;
+          resolvedCustomerId = newCustomer.id;
+        } else if (resolvedCustomerId) {
+          // Update existing customer's credit balance
+          const { data: customer, error: customerError } = await supabase
+            .from("customers")
+            .select("credit_balance")
+            .eq("id", resolvedCustomerId)
+            .single();
 
-        if (creditError) throw creditError;
+          if (customerError) throw customerError;
+
+          const { error: creditError } = await supabase
+            .from("customers")
+            .update({ credit_balance: customer.credit_balance + totalAmount })
+            .eq("id", resolvedCustomerId);
+
+          if (creditError) throw creditError;
+        }
       }
 
       // Create order
