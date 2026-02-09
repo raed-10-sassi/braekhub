@@ -61,37 +61,22 @@ export function useOrders() {
     }) => {
       const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-      // If paying with credits, track debt on customer record
-      if (paymentMethod === "credits") {
-        let resolvedCustomerId = customerId;
+      // If paying with credits and an existing customer is selected, update their credit balance
+      if (paymentMethod === "credits" && customerId) {
+        const { data: customer, error: customerError } = await supabase
+          .from("customers")
+          .select("credit_balance")
+          .eq("id", customerId)
+          .single();
 
-        // Auto-create customer if no existing one selected
-        if (!resolvedCustomerId && customerName) {
-          const { data: newCustomer, error: createError } = await supabase
-            .from("customers")
-            .insert({ name: customerName, credit_balance: totalAmount })
-            .select()
-            .single();
+        if (customerError) throw customerError;
 
-          if (createError) throw createError;
-          resolvedCustomerId = newCustomer.id;
-        } else if (resolvedCustomerId) {
-          // Update existing customer's credit balance
-          const { data: customer, error: customerError } = await supabase
-            .from("customers")
-            .select("credit_balance")
-            .eq("id", resolvedCustomerId)
-            .single();
+        const { error: creditError } = await supabase
+          .from("customers")
+          .update({ credit_balance: customer.credit_balance + totalAmount })
+          .eq("id", customerId);
 
-          if (customerError) throw customerError;
-
-          const { error: creditError } = await supabase
-            .from("customers")
-            .update({ credit_balance: customer.credit_balance + totalAmount })
-            .eq("id", resolvedCustomerId);
-
-          if (creditError) throw creditError;
-        }
+        if (creditError) throw creditError;
       }
 
       // Create order
@@ -101,6 +86,7 @@ export function useOrders() {
           customer_name: customerName || null,
           payment_method: paymentMethod,
           total_amount: totalAmount,
+          customer_id: customerId || null,
         })
         .select()
         .single();
@@ -135,6 +121,7 @@ export function useOrders() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["guest-credits"] });
       toast({ title: "Order placed", description: "Sale has been recorded." });
     },
     onError: (error) => {
