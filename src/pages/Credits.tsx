@@ -26,29 +26,51 @@ export default function Credits() {
   const { guestCredits } = useGuestCredits();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [selectedGuestName, setSelectedGuestName] = useState<string | null>(null);
+  const [selectedGuestMaxAmount, setSelectedGuestMaxAmount] = useState<number>(0);
 
   const customerCreditTotal = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
   const guestCreditTotal = guestCredits.reduce((sum, g) => sum + g.total_owed, 0);
   const totalCredit = customerCreditTotal + guestCreditTotal;
   const totalEntries = customersWithCredit.length + guestCredits.length;
 
+  const isGuestPayment = !!selectedGuestName;
+
   const handlePayCredit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    createPayment.mutate({
-      customer_id: formData.get("customer_id") as string,
-      amount: parseFloat(formData.get("amount") as string),
-      payment_method: formData.get("payment_method") as string,
-      notes: "Credit payment",
-      updateCredit: true,
-    });
+    if (isGuestPayment) {
+      createPayment.mutate({
+        payer_name: selectedGuestName,
+        amount: parseFloat(formData.get("amount") as string),
+        payment_method: formData.get("payment_method") as string,
+        notes: "Guest credit payment",
+      });
+    } else {
+      createPayment.mutate({
+        customer_id: formData.get("customer_id") as string,
+        amount: parseFloat(formData.get("amount") as string),
+        payment_method: formData.get("payment_method") as string,
+        notes: "Credit payment",
+        updateCredit: true,
+      });
+    }
     setPaymentOpen(false);
     setSelectedCustomer(null);
+    setSelectedGuestName(null);
   };
 
   const openPaymentForCustomer = (customerId: string) => {
     setSelectedCustomer(customerId);
+    setSelectedGuestName(null);
+    setPaymentOpen(true);
+  };
+
+  const openPaymentForGuest = (guestName: string, maxAmount: number) => {
+    setSelectedGuestName(guestName);
+    setSelectedGuestMaxAmount(maxAmount);
+    setSelectedCustomer(null);
     setPaymentOpen(true);
   };
 
@@ -59,8 +81,11 @@ export default function Credits() {
           <h1 className="text-3xl font-bold tracking-tight">Credits</h1>
           <p className="text-muted-foreground">Outstanding customer balances</p>
         </div>
-        {customersWithCredit.length > 0 && (
-          <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
+      {(customersWithCredit.length > 0 || guestCredits.length > 0) && (
+          <Dialog open={paymentOpen} onOpenChange={(open) => {
+            setPaymentOpen(open);
+            if (!open) { setSelectedCustomer(null); setSelectedGuestName(null); }
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <DollarSign className="h-4 w-4 mr-2" />
@@ -69,27 +94,46 @@ export default function Credits() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Collect Credit Payment</DialogTitle>
+                <DialogTitle>
+                  {isGuestPayment
+                    ? `Collect from ${selectedGuestName}`
+                    : "Collect Credit Payment"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handlePayCredit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Customer</Label>
-                  <Select name="customer_id" defaultValue={selectedCustomer || undefined} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customersWithCredit.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name} (${customer.credit_balance.toFixed(2)})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {!isGuestPayment && (
+                  <div className="space-y-2">
+                    <Label>Customer</Label>
+                    <Select name="customer_id" defaultValue={selectedCustomer || undefined} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select customer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customersWithCredit.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            {customer.name} (${customer.credit_balance.toFixed(2)})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {isGuestPayment && (
+                  <p className="text-sm text-muted-foreground">
+                    Outstanding: <span className="font-semibold text-foreground">${selectedGuestMaxAmount.toFixed(2)}</span>
+                  </p>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="amount">Payment Amount ($)</Label>
-                  <Input id="amount" name="amount" type="number" step="0.01" min="0.01" required />
+                  <Input
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={isGuestPayment ? selectedGuestMaxAmount : undefined}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Payment Method</Label>
@@ -212,7 +256,13 @@ export default function Credits() {
                       {format(new Date(guest.latest_order), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="text-xs text-muted-foreground">—</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openPaymentForGuest(guest.customer_name, guest.total_owed)}
+                      >
+                        Collect
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
