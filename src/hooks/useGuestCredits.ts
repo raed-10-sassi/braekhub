@@ -22,6 +22,17 @@ export function useGuestCredits() {
 
       if (ordersError) throw ordersError;
 
+      // Get session credit debts (payments with payment_method "credits" and notes "Session credit")
+      const { data: sessionCredits, error: sessionError } = await supabase
+        .from("payments")
+        .select("payer_name, amount, created_at")
+        .eq("payment_method", "credits")
+        .is("customer_id", null)
+        .not("payer_name", "is", null)
+        .eq("notes", "Session credit");
+
+      if (sessionError) throw sessionError;
+
       // Get all guest payments (payments with payer_name, no customer_id)
       const { data: payments, error: paymentsError } = await supabase
         .from("payments")
@@ -55,6 +66,24 @@ export function useGuestCredits() {
         grouped[name].order_count += 1;
         if (order.created_at > grouped[name].latest_order) {
           grouped[name].latest_order = order.created_at;
+        }
+      }
+
+      // Add session credit debts
+      for (const credit of sessionCredits || []) {
+        const name = credit.payer_name!;
+        if (!grouped[name]) {
+          grouped[name] = {
+            customer_name: name,
+            total_owed: 0,
+            order_count: 0,
+            latest_order: credit.created_at,
+          };
+        }
+        grouped[name].total_owed += Number(credit.amount);
+        grouped[name].order_count += 1;
+        if (credit.created_at > grouped[name].latest_order) {
+          grouped[name].latest_order = credit.created_at;
         }
       }
 

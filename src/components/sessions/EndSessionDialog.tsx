@@ -53,14 +53,22 @@ export function EndSessionDialog({
     }
   }, [open, totalAmount, playerNames]);
 
+  const isCredits = paymentMethod === "credits";
+
+  useEffect(() => {
+    if (isCredits) {
+      setPaymentAmount("0");
+    }
+  }, [isCredits]);
+
   const handleConfirm = () => {
-    const paid = parseFloat(paymentAmount) || 0;
+    const paid = isCredits ? 0 : (parseFloat(paymentAmount) || 0);
     // Check if the selected payer is an existing customer
     const customer = customers.find(c => c.name === selectedPayer);
     onConfirm(paid, selectedPayer, paymentMethod, customer?.id);
   };
 
-  const remaining = totalAmount - (parseFloat(paymentAmount) || 0);
+  const remaining = isCredits ? totalAmount : totalAmount - (parseFloat(paymentAmount) || 0);
 
   // Find if any player is a registered customer
   const getPayerCustomer = (name: string): Customer | undefined => {
@@ -118,27 +126,43 @@ export function EndSessionDialog({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="payment">Payment Amount (0 - ${totalAmount.toFixed(2)})</Label>
-            <Input
-              id="payment"
-              type="number"
-              step="0.01"
-              min="0"
-              max={totalAmount}
-              value={paymentAmount}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value) || 0;
-                const clamped = Math.min(Math.max(0, value), totalAmount);
-                setPaymentAmount(clamped.toString());
-              }}
-            />
-            <p className="text-xs text-muted-foreground">
-              Enter the amount the customer is paying now
-            </p>
-          </div>
+          {!isCredits && (
+            <div className="space-y-2">
+              <Label htmlFor="payment">Payment Amount (0 - ${totalAmount.toFixed(2)})</Label>
+              <Input
+                id="payment"
+                type="number"
+                step="0.01"
+                min="0"
+                max={totalAmount}
+                value={paymentAmount}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value) || 0;
+                  const clamped = Math.min(Math.max(0, value), totalAmount);
+                  setPaymentAmount(clamped.toString());
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter the amount the customer is paying now
+              </p>
+            </div>
+          )}
 
-          {remaining > 0.01 && (
+          {isCredits && (
+            <div className="p-3 bg-accent/50 border border-border rounded-lg">
+              <p className="text-sm font-medium text-foreground">
+                Full amount: ${totalAmount.toFixed(2)} will be added to credits
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {getPayerCustomer(selectedPayer) 
+                  ? `This will be added to ${selectedPayer}'s credit balance.`
+                  : `This will appear in the Credits page under ${selectedPayer}'s name.`
+                }
+              </p>
+            </div>
+          )}
+
+          {!isCredits && remaining > 0.01 && (
             <div className="p-3 bg-accent/50 border border-border rounded-lg">
               <p className="text-sm font-medium text-foreground">
                 Remaining: ${remaining.toFixed(2)}

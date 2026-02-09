@@ -95,30 +95,50 @@ export default function Tables() {
   const handleConfirmEndSession = (paymentAmount: number, payerName: string, paymentMethod: string, customerId?: string) => {
     if (!endSessionData) return;
 
-    const remaining = endSessionData.totalAmount - paymentAmount;
-
     endSession.mutate({
       sessionId: endSessionData.sessionId,
       totalAmount: endSessionData.totalAmount,
     });
 
-    // Create payment record for both customers and guests
-    if (paymentAmount > 0) {
-      createPayment.mutate({
-        session_id: endSessionData.sessionId,
-        customer_id: customerId,
-        payer_name: payerName,
-        amount: paymentAmount,
-        payment_method: paymentMethod,
-      });
-    }
+    if (paymentMethod === "credits") {
+      // Credits = entire amount goes to credit (debt), same as consumption orders
+      if (customerId) {
+        // Registered customer: add to credit balance
+        addCreditToCustomer.mutate({
+          customerId: customerId,
+          amount: endSessionData.totalAmount,
+        });
+      } else {
+        // Guest: create payment record to track debt in Credits page
+        createPayment.mutate({
+          session_id: endSessionData.sessionId,
+          payer_name: payerName,
+          amount: endSessionData.totalAmount,
+          payment_method: "credits",
+          notes: "Session credit",
+        });
+      }
+    } else {
+      // Non-credit payment methods
+      const remaining = endSessionData.totalAmount - paymentAmount;
 
-    // Only add credit if the payer is a registered customer
-    if (remaining > 0 && customerId) {
-      addCreditToCustomer.mutate({
-        customerId: customerId,
-        amount: remaining,
-      });
+      if (paymentAmount > 0) {
+        createPayment.mutate({
+          session_id: endSessionData.sessionId,
+          customer_id: customerId,
+          payer_name: payerName,
+          amount: paymentAmount,
+          payment_method: paymentMethod,
+        });
+      }
+
+      // Only add credit if the payer is a registered customer
+      if (remaining > 0 && customerId) {
+        addCreditToCustomer.mutate({
+          customerId: customerId,
+          amount: remaining,
+        });
+      }
     }
 
     setEndSessionData(null);
