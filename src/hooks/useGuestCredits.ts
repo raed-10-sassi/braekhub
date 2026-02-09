@@ -13,18 +13,35 @@ export function useGuestCredits() {
     queryKey: ["guest-credits"],
     queryFn: async () => {
       // Get all credit orders that are NOT linked to a customer (guest orders)
-      const { data, error } = await supabase
+      const { data: orders, error: ordersError } = await supabase
         .from("orders")
         .select("customer_name, total_amount, created_at")
         .eq("payment_method", "credits")
         .is("customer_id", null)
         .not("customer_name", "is", null);
 
-      if (error) throw error;
+      if (ordersError) throw ordersError;
 
-      // Aggregate by customer_name
+      // Get all guest payments (payments with payer_name, no customer_id)
+      const { data: payments, error: paymentsError } = await supabase
+        .from("payments")
+        .select("payer_name, amount")
+        .is("customer_id", null)
+        .not("payer_name", "is", null)
+        .eq("notes", "Guest credit payment");
+
+      if (paymentsError) throw paymentsError;
+
+      // Aggregate payments by payer_name
+      const paidByName: Record<string, number> = {};
+      for (const payment of payments || []) {
+        const name = payment.payer_name!;
+        paidByName[name] = (paidByName[name] || 0) + Number(payment.amount);
+      }
+
+      // Aggregate orders by customer_name
       const grouped: Record<string, GuestCredit> = {};
-      for (const order of data) {
+      for (const order of orders) {
         const name = order.customer_name!;
         if (!grouped[name]) {
           grouped[name] = {
@@ -41,7 +58,14 @@ export function useGuestCredits() {
         }
       }
 
-      return Object.values(grouped).filter((g) => g.total_owed > 0);
+      // Subtract payments already made
+      for (const name of Object.keys(grouped)) {
+        if (paidByName[name]) {
+          grouped[name].total_owed -= paidByName[name];
+        }
+      }
+
+      return Object.values(grouped).filter((g) => g.total_owed > 0.01);
     },
   });
 

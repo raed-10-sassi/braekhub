@@ -82,6 +82,7 @@ export function usePayments() {
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["guest-credits"] });
       toast({
         title: "Payment recorded",
         description: "Payment has been recorded successfully.",
