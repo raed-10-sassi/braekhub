@@ -30,6 +30,7 @@ const PAYMENT_METHODS = [
   { value: "cash", label: "Cash" },
   { value: "card", label: "Card" },
   { value: "mobile", label: "Mobile Payment" },
+  { value: "credits", label: "Credits" },
 ];
 
 export function EndSessionDialog({
