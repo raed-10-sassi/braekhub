@@ -1,10 +1,10 @@
-import { 
-  LayoutDashboard, 
-  Grid3X3, 
-  Users, 
-  Clock, 
-  CreditCard, 
-  Receipt, 
+import {
+  LayoutDashboard,
+  Grid3X3,
+  Users,
+  Clock,
+  CreditCard,
+  Receipt,
   LogOut,
   CircleDot,
   Settings,
@@ -48,7 +48,7 @@ export function AppSidebar() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const NavItem = ({ item }: { item: typeof mainNavItems[0] }) => (
+  const NavItem = ({ item }: { item: (typeof mainNavItems)[0] }) => (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
         <NavLink
@@ -57,7 +57,7 @@ export function AppSidebar() {
             "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
             isActive(item.url)
               ? "bg-sidebar-primary text-sidebar-primary-foreground"
-              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
           )}
         >
           <item.icon className="h-5 w-5 shrink-0" />
@@ -76,7 +76,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <h1 className="font-bold text-sidebar-foreground truncate">PoolHall Pro</h1>
+              <h1 className="font-bold text-sidebar-foreground truncate">Break'hub Pro</h1>
               <p className="text-xs text-sidebar-foreground/60 capitalize">{userRole || "Staff"}</p>
             </div>
           )}
