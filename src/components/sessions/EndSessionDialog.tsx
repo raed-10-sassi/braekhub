@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useCustomers, Customer } from "@/hooks/useCustomers";
 
 interface EndSessionDialogProps {
@@ -23,7 +24,7 @@ interface EndSessionDialogProps {
   onOpenChange: (open: boolean) => void;
   totalAmount: number;
   playerNames: string[];
-  onConfirm: (paymentAmount: number, payerName: string, paymentMethod: string, customerId?: string) => void;
+  onConfirm: (paymentAmount: number, payerName: string, paymentMethod: string, customerId?: string, notes?: string) => void;
 }
 
 const PAYMENT_METHODS = [
@@ -44,12 +45,14 @@ export function EndSessionDialog({
   const [paymentAmount, setPaymentAmount] = useState("");
   const [selectedPayer, setSelectedPayer] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (open) {
       setPaymentAmount(totalAmount.toFixed(2));
       setSelectedPayer(playerNames[0] || "");
       setPaymentMethod("cash");
+      setNotes("");
     }
   }, [open, totalAmount, playerNames]);
 
@@ -63,9 +66,8 @@ export function EndSessionDialog({
 
   const handleConfirm = () => {
     const paid = isCredits ? 0 : (parseFloat(paymentAmount) || 0);
-    // Check if the selected payer is an existing customer
     const customer = customers.find(c => c.name === selectedPayer);
-    onConfirm(paid, selectedPayer, paymentMethod, customer?.id);
+    onConfirm(paid, selectedPayer, paymentMethod, customer?.id, notes || undefined);
   };
 
   const remaining = isCredits ? totalAmount : totalAmount - (parseFloat(paymentAmount) || 0);
@@ -159,6 +161,19 @@ export function EndSessionDialog({
                   : `This will appear in the Credits page under ${selectedPayer}'s name.`
                 }
               </p>
+            </div>
+          )}
+
+          {isCredits && (
+            <div className="space-y-2">
+              <Label htmlFor="credit-notes">Comment (optional)</Label>
+              <Textarea
+                id="credit-notes"
+                placeholder="Add a note about this credit..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+              />
             </div>
           )}
 
