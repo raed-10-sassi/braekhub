@@ -329,6 +329,7 @@ export type Database = {
           name: string
           status: Database["public"]["Enums"]["table_status"]
           table_number: number
+          type: string
           updated_at: string
         }
         Insert: {
@@ -338,6 +339,7 @@ export type Database = {
           name: string
           status?: Database["public"]["Enums"]["table_status"]
           table_number: number
+          type?: string
           updated_at?: string
         }
         Update: {
@@ -347,6 +349,7 @@ export type Database = {
           name?: string
           status?: Database["public"]["Enums"]["table_status"]
           table_number?: number
+          type?: string
           updated_at?: string
         }
         Relationships: []
