@@ -4,12 +4,15 @@ import { useToast } from "@/hooks/use-toast";
 
 export type TableStatus = "available" | "occupied" | "maintenance";
 
+export type TableType = "pool_table" | "video_game";
+
 export interface PoolTable {
   id: string;
   name: string;
   table_number: number;
   status: TableStatus;
   hourly_rate: number;
+  type: TableType;
   created_at: string;
   updated_at: string;
 }
