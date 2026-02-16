@@ -79,12 +79,64 @@ export function useTables() {
     },
   });
 
+  const updateTable = useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; hourly_rate?: number }) => {
+      const { error } = await supabase
+        .from("tables")
+        .update(updates)
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
+      toast({
+        title: "Table updated",
+        description: "Table has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error updating table",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteTable = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("tables")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
+      toast({
+        title: "Table deleted",
+        description: "Table has been removed successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting table",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     tables: tablesQuery.data || [],
     isLoading: tablesQuery.isLoading,
     error: tablesQuery.error,
     updateTableStatus,
     createTable,
+    updateTable,
+    deleteTable,
     refetch: tablesQuery.refetch,
   };
 }
