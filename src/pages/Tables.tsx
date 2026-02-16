@@ -140,6 +140,14 @@ export default function Tables() {
     if (paymentMethod === "credits") {
       if (customerId) {
         addCreditToCustomer.mutate({ customerId, amount: endSessionData.totalAmount });
+        createPayment.mutate({
+          session_id: endSessionData.sessionId,
+          customer_id: customerId,
+          payer_name: payerName,
+          amount: endSessionData.totalAmount,
+          payment_method: "credits",
+          notes: notes || "Session credit",
+        });
       } else {
         createPayment.mutate({
           session_id: endSessionData.sessionId,
