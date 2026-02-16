@@ -129,7 +129,7 @@ export default function Tables() {
     });
   };
 
-  const handleConfirmEndSession = (paymentAmount: number, payerName: string, paymentMethod: string, customerId?: string) => {
+  const handleConfirmEndSession = (paymentAmount: number, payerName: string, paymentMethod: string, customerId?: string, notes?: string) => {
     if (!endSessionData) return;
 
     endSession.mutate({
@@ -146,7 +146,7 @@ export default function Tables() {
           payer_name: payerName,
           amount: endSessionData.totalAmount,
           payment_method: "credits",
-          notes: "Session credit",
+          notes: notes || "Session credit",
         });
       }
     } else {
