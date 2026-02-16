@@ -10,12 +10,13 @@ import { useSessions } from "@/hooks/useSessions";
 import { useCustomers } from "@/hooks/useCustomers";
 import { usePayments } from "@/hooks/usePayments";
 import { TableCard } from "@/components/tables/TableCard";
+import { EditTableDialog } from "@/components/tables/EditTableDialog";
 import { StartSessionDialog } from "@/components/sessions/StartSessionDialog";
 import { EndSessionDialog } from "@/components/sessions/EndSessionDialog";
 import { differenceInMinutes } from "date-fns";
 
 export default function Tables() {
-  const { tables, isLoading, updateTableStatus, createTable } = useTables();
+  const { tables, isLoading, updateTableStatus, createTable, updateTable, deleteTable } = useTables();
   const { activeSessions, startSession, pauseSession, resumeSession, endSession } = useSessions();
   const { customers } = useCustomers();
   const { createPayment, addCreditToCustomer } = usePayments();
@@ -27,8 +28,9 @@ export default function Tables() {
     totalAmount: number;
     playerNames: string[];
   } | null>(null);
-
+  const [editTableId, setEditTableId] = useState<string | null>(null);
   const startSessionTable = tables.find((t) => t.id === startSessionTableId);
+  const editTable = tables.find((t) => t.id === editTableId);
 
   const getActiveSessionForTable = (tableId: string) => {
     return activeSessions.find((s) => s.table_id === tableId);
@@ -210,6 +212,7 @@ export default function Tables() {
                 if (session) resumeSession.mutate(session.id);
               }}
               onEndSession={() => handleEndSessionClick(table.id)}
+              onEditTable={() => setEditTableId(table.id)}
             />
           ))}
         </div>
@@ -236,6 +239,18 @@ export default function Tables() {
         playerNames={endSessionData?.playerNames || []}
         onConfirm={handleConfirmEndSession}
       />
+
+      {/* Edit Table Dialog */}
+      {editTable && (
+        <EditTableDialog
+          open={!!editTableId}
+          onOpenChange={(open) => !open && setEditTableId(null)}
+          table={editTable}
+          onSave={(id, updates) => updateTable.mutate({ id, ...updates })}
+          onDelete={(id) => deleteTable.mutate(id)}
+          isPending={updateTable.isPending || deleteTable.isPending}
+        />
+      )}
     </div>
   );
 }

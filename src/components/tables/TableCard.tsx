@@ -35,6 +35,7 @@ interface TableCardProps {
   onPauseSession: () => void;
   onResumeSession: () => void;
   onEndSession: () => void;
+  onEditTable: () => void;
 }
 
 function ActiveTimer({ startTime, pausedAt, totalPausedSeconds }: { startTime: string; pausedAt?: string | null; totalPausedSeconds?: number }) {
@@ -68,6 +69,7 @@ export function TableCard({
   onPauseSession,
   onResumeSession,
   onEndSession,
+  onEditTable,
 }: TableCardProps) {
   const isOccupied = table.status === "occupied" && activeSession;
   const isAvailable = table.status === "available";
@@ -86,9 +88,16 @@ export function TableCard({
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">{table.name}</CardTitle>
-          <Badge className={statusConfig[table.status].className}>
-            {statusConfig[table.status].label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {!isOccupied && (
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEditTable}>
+                <Settings2 className="h-4 w-4" />
+              </Button>
+            )}
+            <Badge className={statusConfig[table.status].className}>
+              {statusConfig[table.status].label}
+            </Badge>
+          </div>
         </div>
         <CardDescription>Table #{table.table_number}</CardDescription>
       </CardHeader>
