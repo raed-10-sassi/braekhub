@@ -6,6 +6,7 @@ export interface GuestCredit {
   total_owed: number;
   order_count: number;
   latest_order: string;
+  latest_note: string | null;
 }
 
 export function useGuestCredits() {
@@ -22,14 +23,14 @@ export function useGuestCredits() {
 
       if (ordersError) throw ordersError;
 
-      // Get session credit debts (payments with payment_method "credits" and notes "Session credit")
+      // Get session credit debts (payments with payment_method "credits" and notes starting with "Session credit")
       const { data: sessionCredits, error: sessionError } = await supabase
         .from("payments")
-        .select("payer_name, amount, created_at")
+        .select("payer_name, amount, created_at, notes")
         .eq("payment_method", "credits")
         .is("customer_id", null)
         .not("payer_name", "is", null)
-        .eq("notes", "Session credit");
+        .like("notes", "Session credit%");
 
       if (sessionError) throw sessionError;
 
@@ -60,6 +61,7 @@ export function useGuestCredits() {
             total_owed: 0,
             order_count: 0,
             latest_order: order.created_at,
+            latest_note: null,
           };
         }
         grouped[name].total_owed += Number(order.total_amount);
@@ -78,12 +80,17 @@ export function useGuestCredits() {
             total_owed: 0,
             order_count: 0,
             latest_order: credit.created_at,
+            latest_note: null,
           };
         }
         grouped[name].total_owed += Number(credit.amount);
         grouped[name].order_count += 1;
         if (credit.created_at > grouped[name].latest_order) {
           grouped[name].latest_order = credit.created_at;
+        }
+        // Keep the latest note
+        if (credit.notes && credit.notes !== "Session credit") {
+          grouped[name].latest_note = credit.notes;
         }
       }
 

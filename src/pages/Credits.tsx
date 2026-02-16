@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertCircle, DollarSign, Phone, User } from "lucide-react";
+import { AlertCircle, DollarSign, Phone, User, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCustomers } from "@/hooks/useCustomers";
 import { usePayments } from "@/hooks/usePayments";
 import { useGuestCredits } from "@/hooks/useGuestCredits";
+import { useCustomerCreditNotes } from "@/hooks/useCustomerCreditNotes";
 import { format } from "date-fns";
 import {
   Table,
@@ -24,6 +26,7 @@ export default function Credits() {
   const { customersWithCredit, customers } = useCustomers();
   const { createPayment } = usePayments();
   const { guestCredits } = useGuestCredits();
+  const { creditNotes } = useCustomerCreditNotes();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [selectedGuestName, setSelectedGuestName] = useState<string | null>(null);
@@ -195,6 +198,7 @@ export default function Credits() {
                   <TableHead>Name</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Balance</TableHead>
+                  <TableHead>Comment</TableHead>
                   <TableHead>Since</TableHead>
                   <TableHead className="text-right">Action</TableHead>
                 </TableRow>
@@ -218,6 +222,25 @@ export default function Credits() {
                       <Badge variant="destructive" className="font-mono text-base">
                         ${customer.credit_balance.toFixed(2)}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {creditNotes[customer.id] ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex items-center gap-1 cursor-help">
+                                <MessageSquare className="h-3 w-3" />
+                                <span className="truncate max-w-[150px]">{creditNotes[customer.id]}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{creditNotes[customer.id]}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-muted-foreground/50">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {format(new Date(customer.updated_at), "MMM d, yyyy")}
@@ -251,6 +274,25 @@ export default function Credits() {
                       <Badge variant="destructive" className="font-mono text-base">
                         ${guest.total_owed.toFixed(2)}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {guest.latest_note ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex items-center gap-1 cursor-help">
+                                <MessageSquare className="h-3 w-3" />
+                                <span className="truncate max-w-[150px]">{guest.latest_note}</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{guest.latest_note}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-muted-foreground/50">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {format(new Date(guest.latest_order), "MMM d, yyyy")}
