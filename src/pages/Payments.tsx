@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { DollarSign, Plus, CreditCard, Banknote, Smartphone } from "lucide-react";
+import { useMemo, useState } from "react";
+import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -30,6 +33,16 @@ export default function Payments() {
   const { payments, todayPayments, todayTotal, createPayment } = usePayments();
   const { customers, customersWithCredit } = useCustomers();
   const [newPaymentOpen, setNewPaymentOpen] = useState(false);
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+
+  const filteredPayments = useMemo(() => {
+    if (!filterDate) return payments;
+    return payments.filter((p) => isSameDay(new Date(p.created_at), filterDate));
+  }, [payments, filterDate]);
+
+  const filteredTotal = useMemo(() => {
+    return filteredPayments.reduce((sum, p) => sum + p.amount, 0);
+  }, [filteredPayments]);
 
   const handleCreatePayment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -159,12 +172,52 @@ export default function Payments() {
       {/* Payment History */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-          <CardDescription>All recorded payments</CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle>Payment History</CardTitle>
+              <CardDescription>
+                {filterDate
+                  ? `Payments on ${format(filterDate, "MMM d, yyyy")} — Total: $${filteredTotal.toFixed(2)}`
+                  : "All recorded payments"}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[200px] justify-start text-left font-normal",
+                      !filterDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filterDate ? format(filterDate, "PPP") : "Filter by date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={filterDate}
+                    onSelect={setFilterDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              {filterDate && (
+                <Button variant="ghost" size="sm" onClick={() => setFilterDate(undefined)}>
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {payments.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No payments recorded yet</p>
+          {filteredPayments.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              {filterDate ? "No payments on this date" : "No payments recorded yet"}
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -177,7 +230,7 @@ export default function Payments() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payments.map((payment) => {
+                {filteredPayments.map((payment) => {
                   const Icon = paymentMethodIcons[payment.payment_method] || DollarSign;
                   const displayName = payment.customers?.name || payment.payer_name || "Unknown";
                   const isGuest = !payment.customers;
