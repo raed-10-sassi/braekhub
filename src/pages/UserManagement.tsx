@@ -97,8 +97,8 @@ export default function UserManagement() {
                 <Input value={newFullName} onChange={(e) => setNewFullName(e.target.value)} placeholder="John Doe" />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
-                <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} type="email" placeholder="john@example.com" />
+                <Label>Email <span className="text-muted-foreground text-xs">(optionnel)</span></Label>
+                <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} type="email" placeholder="john@example.com (optionnel)" />
               </div>
               <div className="space-y-2">
                 <Label>Mot de passe</Label>
@@ -116,7 +116,7 @@ export default function UserManagement() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreate} disabled={createUser.isPending || !newUsername || !newEmail || !newPassword}>
+              <Button onClick={handleCreate} disabled={createUser.isPending || !newUsername || !newPassword}>
                 {createUser.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 Créer
               </Button>
