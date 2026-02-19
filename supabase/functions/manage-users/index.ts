@@ -89,12 +89,15 @@ Deno.serve(async (req) => {
     if (req.method === "POST" && action === "create") {
       const { username, full_name, email, password, role } = await req.json();
 
-      if (!username || !password || !email) {
+      if (!username || !password) {
         return new Response(
-          JSON.stringify({ error: "username, email, and password are required" }),
+          JSON.stringify({ error: "username and password are required" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // Generate a placeholder email if not provided
+      const userEmail = email || `${username}@placeholder.local`;
 
       // Check username uniqueness
       const { data: existing } = await adminClient
@@ -112,7 +115,7 @@ Deno.serve(async (req) => {
 
       // Create auth user
       const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-        email,
+        email: userEmail,
         password,
         email_confirm: true,
         user_metadata: { full_name: full_name || username },
