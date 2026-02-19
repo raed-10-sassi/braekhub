@@ -93,47 +93,7 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Active Sessions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">Active Sessions</CardTitle>
-              <CardDescription>Currently playing</CardDescription>
-            </div>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/sessions">View All</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {activeSessions.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-6">No active sessions</p>
-            ) : (
-              <div className="space-y-3">
-                {activeSessions.slice(0, 5).map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <span className="font-bold text-primary">{session.tables.table_number}</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">{session.customers.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Started {formatDistanceToNow(new Date(session.start_time), { addSuffix: true })}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant="secondary">{session.player_count} players</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-6 lg:grid-cols-1">
         {/* Outstanding Credits */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
