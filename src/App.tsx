@@ -13,6 +13,7 @@ import Customers from "./pages/Customers";
 import Payments from "./pages/Payments";
 import Credits from "./pages/Credits";
 import Consumptions from "./pages/Consumptions";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,14 @@ const App = () => (
               element={
                 <AppLayout>
                   <Consumptions />
+                </AppLayout>
+              }
+            />
+            <Route
+              path="/user-management"
+              element={
+                <AppLayout>
+                  <UserManagement />
                 </AppLayout>
               }
             />
