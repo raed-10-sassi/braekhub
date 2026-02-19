@@ -9,6 +9,7 @@ import {
   CircleDot,
   Settings,
   Coffee,
+  UserCog,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,10 +41,14 @@ const financeNavItems = [
   { title: "Credits", url: "/credits", icon: Receipt },
 ];
 
+const adminNavItems = [
+  { title: "Utilisateurs", url: "/user-management", icon: UserCog },
+];
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
-  const { signOut, user, userRole } = useAuth();
+  const { signOut, user, userRole, isAdmin } = useAuth();
   const collapsed = state === "collapsed";
 
   const isActive = (path: string) => location.pathname === path;
@@ -105,6 +110,19 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/50">Administration</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminNavItems.map((item) => (
+                  <NavItem key={item.title} item={item} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">
