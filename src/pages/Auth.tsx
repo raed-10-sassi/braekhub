@@ -31,29 +31,34 @@ export default function Auth() {
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const username = (formData.get("username") as string).trim();
+    const identifier = (formData.get("identifier") as string).trim();
     const password = formData.get("password") as string;
 
     try {
-      // Look up email by username
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("username", username)
-        .single();
+      let email = identifier;
 
-      if (profileError || !profile) {
-        toast({
-          title: "Connexion échouée",
-          description: "Nom d'utilisateur ou mot de passe incorrect",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
+      // If it doesn't look like an email, look up by username
+      if (!identifier.includes("@")) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("username", identifier)
+          .single();
+
+        if (profileError || !profile) {
+          toast({
+            title: "Connexion échouée",
+            description: "Nom d'utilisateur ou mot de passe incorrect",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        email = profile.email;
       }
 
       const { error } = await supabase.auth.signInWithPassword({
-        email: profile.email,
+        email,
         password,
       });
 
@@ -96,12 +101,12 @@ export default function Auth() {
           <CardContent>
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Nom d'utilisateur</Label>
+                <Label htmlFor="identifier">Nom d'utilisateur ou Email</Label>
                 <Input
-                  id="username"
-                  name="username"
+                  id="identifier"
+                  name="identifier"
                   type="text"
-                  placeholder="Entrez votre nom d'utilisateur"
+                  placeholder="username ou email@exemple.com"
                   required
                 />
               </div>
