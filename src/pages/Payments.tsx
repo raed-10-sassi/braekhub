@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
-import { format, isSameDay } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -33,12 +33,21 @@ export default function Payments() {
   const { payments, todayPayments, todayTotal, createPayment } = usePayments();
   const { customers, customersWithCredit } = useCustomers();
   const [newPaymentOpen, setNewPaymentOpen] = useState(false);
-  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+  const [filterFrom, setFilterFrom] = useState<Date | undefined>(undefined);
+  const [filterTo, setFilterTo] = useState<Date | undefined>(undefined);
 
   const filteredPayments = useMemo(() => {
-    if (!filterDate) return payments;
-    return payments.filter((p) => isSameDay(new Date(p.created_at), filterDate));
-  }, [payments, filterDate]);
+    if (!filterFrom && !filterTo) return payments;
+    return payments.filter((p) => {
+      const d = new Date(p.created_at);
+      if (filterFrom && filterTo) {
+        return isWithinInterval(d, { start: startOfDay(filterFrom), end: endOfDay(filterTo) });
+      }
+      if (filterFrom) return d >= startOfDay(filterFrom);
+      if (filterTo) return d <= endOfDay(filterTo);
+      return true;
+    });
+  }, [payments, filterFrom, filterTo]);
 
   const filteredTotal = useMemo(() => {
     return filteredPayments.reduce((sum, p) => sum + p.amount, 0);
@@ -176,37 +185,60 @@ export default function Payments() {
             <div>
               <CardTitle>Payment History</CardTitle>
               <CardDescription>
-                {filterDate
-                  ? `Payments on ${format(filterDate, "MMM d, yyyy")} — Total: $${filteredTotal.toFixed(2)}`
+                {filterFrom || filterTo
+                  ? `${filterFrom ? format(filterFrom, "MMM d, yyyy") : "Start"}${filterTo ? ` — ${format(filterTo, "MMM d, yyyy")}` : ""} — Total: $${filteredTotal.toFixed(2)}`
                   : "All recorded payments"}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[200px] justify-start text-left font-normal",
-                      !filterDate && "text-muted-foreground"
+                      "w-[160px] justify-start text-left font-normal",
+                      !filterFrom && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filterDate ? format(filterDate, "PPP") : "Filter by date"}
+                    {filterFrom ? format(filterFrom, "PP") : "From"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="end">
                   <Calendar
                     mode="single"
-                    selected={filterDate}
-                    onSelect={setFilterDate}
+                    selected={filterFrom}
+                    onSelect={setFilterFrom}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
-              {filterDate && (
-                <Button variant="ghost" size="sm" onClick={() => setFilterDate(undefined)}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[160px] justify-start text-left font-normal",
+                      !filterTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filterTo ? format(filterTo, "PP") : "To"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={filterTo}
+                    onSelect={setFilterTo}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              {(filterFrom || filterTo) && (
+                <Button variant="ghost" size="sm" onClick={() => { setFilterFrom(undefined); setFilterTo(undefined); }}>
                   Clear
                 </Button>
               )}
@@ -216,7 +248,7 @@ export default function Payments() {
         <CardContent>
           {filteredPayments.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              {filterDate ? "No payments on this date" : "No payments recorded yet"}
+              {filterFrom || filterTo ? "No payments in this period" : "No payments recorded yet"}
             </p>
           ) : (
             <Table>
