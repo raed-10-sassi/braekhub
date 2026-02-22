@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon } from "lucide-react";
+import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -242,6 +243,27 @@ export default function Payments() {
                   Clear
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const rows = filteredPayments.map((p) => ({
+                    Date: format(new Date(p.created_at), "yyyy-MM-dd HH:mm"),
+                    Client: p.customers?.name || p.payer_name || "Unknown",
+                    Montant: p.amount,
+                    Méthode: p.payment_method,
+                    Notes: p.notes || "",
+                  }));
+                  const ws = XLSX.utils.json_to_sheet(rows);
+                  const wb = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(wb, ws, "Paiements");
+                  XLSX.writeFile(wb, `paiements_${format(new Date(), "yyyy-MM-dd")}.xlsx`);
+                }}
+                disabled={filteredPayments.length === 0}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Excel
+              </Button>
             </div>
           </div>
         </CardHeader>
