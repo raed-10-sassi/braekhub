@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
-import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { format, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -36,19 +36,30 @@ export default function Payments() {
   const [newPaymentOpen, setNewPaymentOpen] = useState(false);
   const [filterFrom, setFilterFrom] = useState<Date | undefined>(undefined);
   const [filterTo, setFilterTo] = useState<Date | undefined>(undefined);
+  const [filterFromTime, setFilterFromTime] = useState("00:00");
+  const [filterToTime, setFilterToTime] = useState("23:59");
+
+  const buildDateWithTime = (date: Date, time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    const d = new Date(date);
+    d.setHours(h, m, 0, 0);
+    return d;
+  };
 
   const filteredPayments = useMemo(() => {
     if (!filterFrom && !filterTo) return payments;
     return payments.filter((p) => {
       const d = new Date(p.created_at);
-      if (filterFrom && filterTo) {
-        return isWithinInterval(d, { start: startOfDay(filterFrom), end: endOfDay(filterTo) });
+      const start = filterFrom ? buildDateWithTime(filterFrom, filterFromTime) : undefined;
+      const end = filterTo ? buildDateWithTime(filterTo, filterToTime) : undefined;
+      if (start && end) {
+        return isWithinInterval(d, { start, end });
       }
-      if (filterFrom) return d >= startOfDay(filterFrom);
-      if (filterTo) return d <= endOfDay(filterTo);
+      if (start) return d >= start;
+      if (end) return d <= end;
       return true;
     });
-  }, [payments, filterFrom, filterTo]);
+  }, [payments, filterFrom, filterTo, filterFromTime, filterToTime]);
 
   const filteredTotal = useMemo(() => {
     return filteredPayments.reduce((sum, p) => sum + p.amount, 0);
@@ -213,6 +224,15 @@ export default function Payments() {
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
+                  <div className="px-3 pb-3">
+                    <Label className="text-xs text-muted-foreground">Heure</Label>
+                    <Input
+                      type="time"
+                      value={filterFromTime}
+                      onChange={(e) => setFilterFromTime(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
                 </PopoverContent>
               </Popover>
               <Popover>
@@ -236,10 +256,19 @@ export default function Payments() {
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
+                  <div className="px-3 pb-3">
+                    <Label className="text-xs text-muted-foreground">Heure</Label>
+                    <Input
+                      type="time"
+                      value={filterToTime}
+                      onChange={(e) => setFilterToTime(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
                 </PopoverContent>
               </Popover>
               {(filterFrom || filterTo) && (
-                <Button variant="ghost" size="sm" onClick={() => { setFilterFrom(undefined); setFilterTo(undefined); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFilterFrom(undefined); setFilterTo(undefined); setFilterFromTime("00:00"); setFilterToTime("23:59"); }}>
                   Clear
                 </Button>
               )}
