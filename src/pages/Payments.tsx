@@ -62,7 +62,9 @@ export default function Payments() {
   }, [payments, filterFrom, filterTo, filterFromTime, filterToTime]);
 
   const filteredTotal = useMemo(() => {
-    return filteredPayments.reduce((sum, p) => sum + p.amount, 0);
+    return filteredPayments
+      .filter((p) => p.payment_method !== "credits")
+      .reduce((sum, p) => sum + p.amount, 0);
   }, [filteredPayments]);
 
   const handleCreatePayment = (e: React.FormEvent<HTMLFormElement>) => {
