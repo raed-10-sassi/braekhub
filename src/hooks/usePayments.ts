@@ -133,6 +133,7 @@ export function usePayments() {
   });
 
   const todayPayments = paymentsQuery.data?.filter((p) => {
+    if (p.payment_method === "credits") return false;
     const today = new Date();
     const paymentDate = new Date(p.created_at);
     return (
