@@ -6,6 +6,7 @@ import { useTables } from "@/hooks/useTables";
 import { useSessions } from "@/hooks/useSessions";
 import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
+import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 
