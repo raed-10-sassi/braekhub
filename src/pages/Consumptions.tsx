@@ -38,6 +38,20 @@ export default function Consumptions() {
 
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
+  const [filterPreset, setFilterPreset] = useState<FilterPreset>("all");
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
+
+  const filteredOrders = useMemo(() => {
+    const { from, to } = getFilterDateRange(filterPreset, dateFrom, dateTo);
+    if (!from && !to) return orders;
+    return orders.filter((o) => {
+      const d = new Date(o.created_at);
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    });
+  }, [orders, filterPreset, dateFrom, dateTo]);
 
   const lowStockCount = products.filter((p) => p.stock_quantity <= 5).length;
   const todayOrders = orders.filter((o) => {
