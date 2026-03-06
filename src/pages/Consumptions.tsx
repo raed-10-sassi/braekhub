@@ -212,6 +212,16 @@ export default function Consumptions() {
               </TableBody>
             </Table>
           </div>
+          {filteredOrders.length > 0 && (
+            <div className="flex items-center justify-between rounded-md border bg-muted/50 px-4 py-3">
+              <span className="text-sm text-muted-foreground">
+                {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+              </span>
+              <span className="text-lg font-bold font-mono">
+                Total: ${filteredOrders.reduce((sum, o) => sum + o.total_amount, 0).toFixed(2)}
+              </span>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
