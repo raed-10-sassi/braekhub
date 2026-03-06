@@ -53,20 +53,27 @@ export default function Dashboard() {
   const { todayTotal, todayPayments } = usePayments();
   const { customersWithCredit } = useCustomers();
   const { withdrawals } = useCashWithdrawals();
+  const { orders } = useOrders();
 
   const availableTables = tables.filter((t) => t.status === "available").length;
   const occupiedTables = tables.filter((t) => t.status === "occupied").length;
   const totalCredit = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
 
   const today = new Date();
+  const isToday = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  };
+
   const todayWithdrawalsTotal = withdrawals
-    .filter((w) => {
-      const d = new Date(w.created_at);
-      return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-    })
+    .filter((w) => isToday(w.created_at))
     .reduce((sum, w) => sum + w.amount, 0);
 
-  const netTodayTotal = todayTotal - todayWithdrawalsTotal;
+  const todayOrdersTotal = orders
+    .filter((o) => isToday(o.created_at) && o.payment_method !== "credits")
+    .reduce((sum, o) => sum + o.total_amount, 0);
+
+  const netTodayTotal = todayTotal + todayOrdersTotal - todayWithdrawalsTotal;
 
   return (
     <div className="space-y-6">
