@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, ShoppingCart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import { CategoryManager } from "@/components/consumptions/CategoryManager";
 import { ProductTable } from "@/components/consumptions/ProductTable";
 import { AddProductDialog } from "@/components/consumptions/AddProductDialog";
 import { NewOrderDialog } from "@/components/consumptions/NewOrderDialog";
+import { OrderFilters, FilterPreset, getFilterDateRange } from "@/components/consumptions/OrderFilters";
 import { format } from "date-fns";
 
 export default function Consumptions() {
@@ -37,6 +38,20 @@ export default function Consumptions() {
 
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
+  const [filterPreset, setFilterPreset] = useState<FilterPreset>("all");
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
+
+  const filteredOrders = useMemo(() => {
+    const { from, to } = getFilterDateRange(filterPreset, dateFrom, dateTo);
+    if (!from && !to) return orders;
+    return orders.filter((o) => {
+      const d = new Date(o.created_at);
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    });
+  }, [orders, filterPreset, dateFrom, dateTo]);
 
   const lowStockCount = products.filter((p) => p.stock_quantity <= 5).length;
   const todayOrders = orders.filter((o) => {
@@ -142,7 +157,15 @@ export default function Consumptions() {
           />
         </TabsContent>
 
-        <TabsContent value="orders" className="mt-4">
+        <TabsContent value="orders" className="mt-4 space-y-4">
+          <OrderFilters
+            preset={filterPreset}
+            onPresetChange={setFilterPreset}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+          />
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -155,14 +178,14 @@ export default function Consumptions() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.length === 0 ? (
+                {filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No orders yet
+                      No orders found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  orders.map((order) => (
+                  filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="text-sm">
                         {format(new Date(order.created_at), "MMM d, HH:mm")}
