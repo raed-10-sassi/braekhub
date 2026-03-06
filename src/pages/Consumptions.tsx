@@ -157,7 +157,15 @@ export default function Consumptions() {
           />
         </TabsContent>
 
-        <TabsContent value="orders" className="mt-4">
+        <TabsContent value="orders" className="mt-4 space-y-4">
+          <OrderFilters
+            preset={filterPreset}
+            onPresetChange={setFilterPreset}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+          />
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -170,14 +178,14 @@ export default function Consumptions() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.length === 0 ? (
+                {filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No orders yet
+                      No orders found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  orders.map((order) => (
+                  filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="text-sm">
                         {format(new Date(order.created_at), "MMM d, HH:mm")}
