@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      cash_withdrawals: {
+        Row: {
+          amount: number
+          comment: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+        }
+        Insert: {
+          amount: number
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+        }
+        Update: {
+          amount?: number
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
