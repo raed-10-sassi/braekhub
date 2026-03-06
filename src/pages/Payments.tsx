@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download } from "lucide-react";
+import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download, ShoppingCart, ArrowDownCircle } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
+import { useOrders } from "@/hooks/useOrders";
+import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
 import { format, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -30,9 +32,22 @@ const paymentMethodIcons: Record<string, React.ElementType> = {
   mobile: Smartphone,
 };
 
+interface UnifiedEntry {
+  id: string;
+  type: "payment" | "order" | "withdrawal";
+  date: string;
+  name: string;
+  amount: number;
+  paymentMethod: string;
+  notes: string;
+  isGuest: boolean;
+}
+
 export default function Payments() {
-  const { payments, todayPayments, todayTotal, createPayment } = usePayments();
+  const { payments, createPayment } = usePayments();
   const { customers, customersWithCredit } = useCustomers();
+  const { orders } = useOrders();
+  const { withdrawals } = useCashWithdrawals();
   const [newPaymentOpen, setNewPaymentOpen] = useState(false);
   const [filterFrom, setFilterFrom] = useState<Date | undefined>(undefined);
   const [filterTo, setFilterTo] = useState<Date | undefined>(undefined);
@@ -46,26 +61,106 @@ export default function Payments() {
     return d;
   };
 
-  const filteredPayments = useMemo(() => {
-    if (!filterFrom && !filterTo) return payments;
-    return payments.filter((p) => {
-      const d = new Date(p.created_at);
+  // Build unified list
+  const unifiedEntries = useMemo<UnifiedEntry[]>(() => {
+    const entries: UnifiedEntry[] = [];
+
+    // Payments
+    payments.forEach((p) => {
+      entries.push({
+        id: p.id,
+        type: "payment",
+        date: p.created_at,
+        name: p.customers?.name || p.payer_name || "Unknown",
+        amount: p.amount,
+        paymentMethod: p.payment_method,
+        notes: p.notes || "",
+        isGuest: !p.customers,
+      });
+    });
+
+    // Consumption orders
+    orders.forEach((o) => {
+      entries.push({
+        id: o.id,
+        type: "order",
+        date: o.created_at,
+        name: o.customer_name || "Unknown",
+        amount: o.total_amount,
+        paymentMethod: o.payment_method,
+        notes: "Consumption order",
+        isGuest: false,
+      });
+    });
+
+    // Cash withdrawals
+    withdrawals.forEach((w) => {
+      entries.push({
+        id: w.id,
+        type: "withdrawal",
+        date: w.created_at,
+        name: "Cash Withdrawal",
+        amount: w.amount,
+        paymentMethod: "cash",
+        notes: w.comment || "",
+        isGuest: false,
+      });
+    });
+
+    // Sort by date descending
+    entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return entries;
+  }, [payments, orders, withdrawals]);
+
+  // Apply date filter
+  const filteredEntries = useMemo(() => {
+    if (!filterFrom && !filterTo) return unifiedEntries;
+    return unifiedEntries.filter((e) => {
+      const d = new Date(e.date);
       const start = filterFrom ? buildDateWithTime(filterFrom, filterFromTime) : undefined;
       const end = filterTo ? buildDateWithTime(filterTo, filterToTime) : undefined;
-      if (start && end) {
-        return isWithinInterval(d, { start, end });
-      }
+      if (start && end) return isWithinInterval(d, { start, end });
       if (start) return d >= start;
       if (end) return d <= end;
       return true;
     });
-  }, [payments, filterFrom, filterTo, filterFromTime, filterToTime]);
+  }, [unifiedEntries, filterFrom, filterTo, filterFromTime, filterToTime]);
 
-  const filteredTotal = useMemo(() => {
-    return filteredPayments
-      .filter((p) => p.payment_method !== "credits")
+  // Today helpers
+  const today = new Date();
+  const isToday = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  };
+
+  // Today's total = payments (excl credits) + orders (excl credits) - withdrawals
+  const todayTotal = useMemo(() => {
+    const paymentsTotal = payments
+      .filter((p) => isToday(p.created_at) && p.payment_method !== "credits")
       .reduce((sum, p) => sum + p.amount, 0);
-  }, [filteredPayments]);
+    const ordersTotal = orders
+      .filter((o) => isToday(o.created_at) && o.payment_method !== "credits")
+      .reduce((sum, o) => sum + o.total_amount, 0);
+    const withdrawalsTotal = withdrawals
+      .filter((w) => isToday(w.created_at))
+      .reduce((sum, w) => sum + w.amount, 0);
+    return paymentsTotal + ordersTotal - withdrawalsTotal;
+  }, [payments, orders, withdrawals]);
+
+  const todayEntriesCount = unifiedEntries.filter((e) => isToday(e.date)).length;
+
+  // Filtered total (excl credits, withdrawals subtracted)
+  const filteredTotal = useMemo(() => {
+    let total = 0;
+    filteredEntries.forEach((e) => {
+      if (e.type === "withdrawal") {
+        total -= e.amount;
+      } else if (e.paymentMethod !== "credits") {
+        total += e.amount;
+      }
+    });
+    return total;
+  }, [filteredEntries]);
 
   const handleCreatePayment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,6 +176,18 @@ export default function Payments() {
       updateCredit: isCredit,
     });
     setNewPaymentOpen(false);
+  };
+
+  const getEntryIcon = (entry: UnifiedEntry) => {
+    if (entry.type === "order") return ShoppingCart;
+    if (entry.type === "withdrawal") return ArrowDownCircle;
+    return paymentMethodIcons[entry.paymentMethod] || DollarSign;
+  };
+
+  const getEntryTypeBadge = (entry: UnifiedEntry) => {
+    if (entry.type === "order") return <Badge variant="outline" className="text-xs">Order</Badge>;
+    if (entry.type === "withdrawal") return <Badge variant="destructive" className="text-xs">Withdrawal</Badge>;
+    return null;
   };
 
   return (
@@ -163,19 +270,21 @@ export default function Payments() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Today's Total</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Today's Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-success">${todayTotal.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">{todayPayments.length} payments</p>
+            <div className={cn("text-3xl font-bold", todayTotal >= 0 ? "text-success" : "text-destructive")}>
+              ${todayTotal.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">{todayEntriesCount} entries today</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Payments</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Entries</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{payments.length}</div>
+            <div className="text-3xl font-bold">{unifiedEntries.length}</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -201,7 +310,7 @@ export default function Payments() {
               <CardDescription>
                 {filterFrom || filterTo
                   ? `${filterFrom ? format(filterFrom, "MMM d, yyyy") : "Start"}${filterTo ? ` — ${format(filterTo, "MMM d, yyyy")}` : ""} — Total: $${filteredTotal.toFixed(2)}`
-                  : "All recorded payments"}
+                  : "All payments, orders & withdrawals"}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -278,19 +387,20 @@ export default function Payments() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const rows = filteredPayments.map((p) => ({
-                    Date: format(new Date(p.created_at), "yyyy-MM-dd HH:mm"),
-                    Client: p.customers?.name || p.payer_name || "Unknown",
-                    Montant: p.amount,
-                    Méthode: p.payment_method,
-                    Notes: p.notes || "",
+                  const rows = filteredEntries.map((e) => ({
+                    Date: format(new Date(e.date), "yyyy-MM-dd HH:mm"),
+                    Type: e.type,
+                    Client: e.name,
+                    Montant: e.type === "withdrawal" ? -e.amount : e.amount,
+                    Méthode: e.paymentMethod,
+                    Notes: e.notes || "",
                   }));
                   const ws = XLSX.utils.json_to_sheet(rows);
                   const wb = XLSX.utils.book_new();
                   XLSX.utils.book_append_sheet(wb, ws, "Paiements");
                   XLSX.writeFile(wb, `paiements_${format(new Date(), "yyyy-MM-dd")}.xlsx`);
                 }}
-                disabled={filteredPayments.length === 0}
+                disabled={filteredEntries.length === 0}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Excel
@@ -299,51 +409,62 @@ export default function Payments() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredPayments.length === 0 ? (
+          {filteredEntries.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              {filterFrom || filterTo ? "No payments in this period" : "No payments recorded yet"}
+              {filterFrom || filterTo ? "No entries in this period" : "No entries recorded yet"}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPayments.map((payment) => {
-                  const Icon = paymentMethodIcons[payment.payment_method] || DollarSign;
-                  const displayName = payment.customers?.name || payment.payer_name || "Unknown";
-                  const isGuest = !payment.customers;
+                {filteredEntries.map((entry) => {
+                  const Icon = getEntryIcon(entry);
                   return (
-                    <TableRow key={payment.id}>
+                    <TableRow key={`${entry.type}-${entry.id}`}>
                       <TableCell className="text-muted-foreground">
-                        {format(new Date(payment.created_at), "MMM d, yyyy HH:mm")}
+                        {format(new Date(entry.date), "MMM d, yyyy HH:mm")}
+                      </TableCell>
+                      <TableCell>
+                        {getEntryTypeBadge(entry) || <Badge variant="secondary" className="text-xs">Payment</Badge>}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {displayName}
-                        {isGuest && (
+                        {entry.name}
+                        {entry.isGuest && (
                           <Badge variant="outline" className="ml-2 text-xs">Guest</Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="font-mono bg-success/10 text-success">
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "font-mono",
+                            entry.type === "withdrawal"
+                              ? "bg-destructive/10 text-destructive"
+                              : "bg-success/10 text-success"
+                          )}
+                        >
+                          {entry.type === "withdrawal" ? "-" : ""}
                           <DollarSign className="h-3 w-3" />
-                          {payment.amount.toFixed(2)}
+                          {entry.amount.toFixed(2)}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4 text-muted-foreground" />
-                          <span className="capitalize">{payment.payment_method}</span>
+                          <span className="capitalize">{entry.paymentMethod}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                        {payment.notes || "-"}
+                        {entry.notes || "-"}
                       </TableCell>
                     </TableRow>
                   );
