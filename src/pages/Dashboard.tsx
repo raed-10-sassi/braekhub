@@ -91,8 +91,8 @@ export default function Dashboard() {
         />
         <StatCard
           title="Today's Revenue"
-          value={`$${todayTotal.toFixed(2)}`}
-          description={`${todayPayments.length} payments`}
+          value={`$${netTodayTotal.toFixed(2)}`}
+          description={`${todayPayments.length} payments${todayWithdrawalsTotal > 0 ? ` - $${todayWithdrawalsTotal.toFixed(2)} withdrawals` : ""}`}
           icon={DollarSign}
           variant="success"
         />
