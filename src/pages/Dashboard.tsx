@@ -51,10 +51,21 @@ export default function Dashboard() {
   const { activeSessions, todaySessions } = useSessions();
   const { todayTotal, todayPayments } = usePayments();
   const { customersWithCredit } = useCustomers();
+  const { withdrawals } = useCashWithdrawals();
 
   const availableTables = tables.filter((t) => t.status === "available").length;
   const occupiedTables = tables.filter((t) => t.status === "occupied").length;
   const totalCredit = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
+
+  const today = new Date();
+  const todayWithdrawalsTotal = withdrawals
+    .filter((w) => {
+      const d = new Date(w.created_at);
+      return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    })
+    .reduce((sum, w) => sum + w.amount, 0);
+
+  const netTodayTotal = todayTotal - todayWithdrawalsTotal;
 
   return (
     <div className="space-y-6">
