@@ -6,6 +6,7 @@ import { useTables } from "@/hooks/useTables";
 import { useSessions } from "@/hooks/useSessions";
 import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
+import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 
@@ -50,10 +51,21 @@ export default function Dashboard() {
   const { activeSessions, todaySessions } = useSessions();
   const { todayTotal, todayPayments } = usePayments();
   const { customersWithCredit } = useCustomers();
+  const { withdrawals } = useCashWithdrawals();
 
   const availableTables = tables.filter((t) => t.status === "available").length;
   const occupiedTables = tables.filter((t) => t.status === "occupied").length;
   const totalCredit = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
+
+  const today = new Date();
+  const todayWithdrawalsTotal = withdrawals
+    .filter((w) => {
+      const d = new Date(w.created_at);
+      return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    })
+    .reduce((sum, w) => sum + w.amount, 0);
+
+  const netTodayTotal = todayTotal - todayWithdrawalsTotal;
 
   return (
     <div className="space-y-6">
@@ -79,8 +91,8 @@ export default function Dashboard() {
         />
         <StatCard
           title="Today's Revenue"
-          value={`$${todayTotal.toFixed(2)}`}
-          description={`${todayPayments.length} payments`}
+          value={`$${netTodayTotal.toFixed(2)}`}
+          description={`${todayPayments.length} payments${todayWithdrawalsTotal > 0 ? ` - $${todayWithdrawalsTotal.toFixed(2)} withdrawals` : ""}`}
           icon={DollarSign}
           variant="success"
         />
