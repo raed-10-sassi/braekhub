@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, ShoppingCart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import { CategoryManager } from "@/components/consumptions/CategoryManager";
 import { ProductTable } from "@/components/consumptions/ProductTable";
 import { AddProductDialog } from "@/components/consumptions/AddProductDialog";
 import { NewOrderDialog } from "@/components/consumptions/NewOrderDialog";
+import { OrderFilters, FilterPreset, getFilterDateRange } from "@/components/consumptions/OrderFilters";
 import { format } from "date-fns";
 
 export default function Consumptions() {
