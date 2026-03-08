@@ -11,6 +11,7 @@ interface EditTableDialogProps {
   onSave: (id: string, updates: { name: string; hourly_rate: number }) => void;
   onDelete: (id: string) => void;
   isPending?: boolean;
+  isAdmin?: boolean;
 }
 
 export function EditTableDialog({ open, onOpenChange, table, onSave, onDelete, isPending }: EditTableDialogProps) {
