@@ -76,9 +76,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
-            <CircleDot className="h-6 w-6 text-sidebar-primary-foreground" />
-          </div>
+          <img src={logo} alt="Le Break'hub" className="h-10 w-10 rounded-lg object-cover shrink-0" />
           {!collapsed && (
             <div className="overflow-hidden">
               <h1 className="font-bold text-sidebar-foreground truncate">Break'hub Pro</h1>
