@@ -47,7 +47,8 @@ export function EditTableDialog({ open, onOpenChange, table, onSave, onDelete, i
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-rate">Hourly Rate ($)</Label>
-            <Input id="edit-rate" type="number" step="0.01" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} required />
+            <Input id="edit-rate" type="number" step="0.01" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} required disabled={!isAdmin} />
+            {!isAdmin && <p className="text-xs text-muted-foreground">Seul un admin peut modifier le tarif</p>}
           </div>
           <div className="flex gap-2">
             <Button type="submit" className="flex-1" disabled={isPending}>

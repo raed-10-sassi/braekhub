@@ -337,6 +337,7 @@ export default function Tables() {
           onSave={(id, updates) => updateTable.mutate({ id, ...updates })}
           onDelete={(id) => deleteTable.mutate(id)}
           isPending={updateTable.isPending || deleteTable.isPending}
+          isAdmin={isAdmin}
         />
       )}
     </div>
