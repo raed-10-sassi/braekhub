@@ -14,7 +14,7 @@ interface EditTableDialogProps {
   isAdmin?: boolean;
 }
 
-export function EditTableDialog({ open, onOpenChange, table, onSave, onDelete, isPending }: EditTableDialogProps) {
+export function EditTableDialog({ open, onOpenChange, table, onSave, onDelete, isPending, isAdmin }: EditTableDialogProps) {
   const [name, setName] = useState(table.name);
   const [hourlyRate, setHourlyRate] = useState(table.hourly_rate.toString());
   const [confirmDelete, setConfirmDelete] = useState(false);
