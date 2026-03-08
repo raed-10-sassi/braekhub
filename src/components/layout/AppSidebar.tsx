@@ -6,11 +6,11 @@ import {
   CreditCard,
   Receipt,
   LogOut,
-  CircleDot,
   Settings,
   Coffee,
   UserCog,
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
