@@ -79,7 +79,7 @@ export function AppSidebar() {
           <img src={logo} alt="Le Break'hub" className="h-10 w-10 rounded-lg object-cover shrink-0" />
           {!collapsed && (
             <div className="overflow-hidden">
-              <h1 className="font-bold text-sidebar-foreground truncate">Break'hub Pro</h1>
+              <h1 className="font-bold text-sidebar-foreground truncate">Break'hub</h1>
               <p className="text-xs text-sidebar-foreground/60 capitalize">{userRole || "Staff"}</p>
             </div>
           )}
