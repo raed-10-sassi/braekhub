@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Plus, Gamepad2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { EndSessionDialog } from "@/components/sessions/EndSessionDialog";
 import { differenceInMinutes } from "date-fns";
 
 export default function Tables() {
+  const { isAdmin } = useAuth();
   const { tables, isLoading, updateTableStatus, createTable, updateTable, deleteTable } = useTables();
   const { activeSessions, startSession, pauseSession, resumeSession, endSession } = useSessions();
   const { customers } = useCustomers();
@@ -335,6 +337,7 @@ export default function Tables() {
           onSave={(id, updates) => updateTable.mutate({ id, ...updates })}
           onDelete={(id) => deleteTable.mutate(id)}
           isPending={updateTable.isPending || deleteTable.isPending}
+          isAdmin={isAdmin}
         />
       )}
     </div>
