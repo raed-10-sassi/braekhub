@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CircleDot } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.png";
 
 export default function Auth() {
   const { user, isLoading } = useAuth();
@@ -83,14 +84,9 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-            <CircleDot className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Break'hub Pro</h1>
-            <p className="text-sm text-muted-foreground">Système de Gestion</p>
-          </div>
+        <div className="flex flex-col items-center justify-center mb-8">
+          <img src={logo} alt="Le Break'hub" className="h-24 w-auto mb-2" />
+          <p className="text-sm text-muted-foreground">Système de Gestion</p>
         </div>
 
         <Card className="border-border/50 shadow-xl">
