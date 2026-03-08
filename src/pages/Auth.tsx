@@ -86,7 +86,7 @@ export default function Auth() {
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center justify-center mb-8">
           <img src={logo} alt="Le Break'hub" className="h-24 w-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Système de Gestion</p>
+          <p className="text-sm text-muted-foreground">Break'hub Manzah</p>
         </div>
 
         <Card className="border-border/50 shadow-xl">
