@@ -18,6 +18,7 @@ import { EndSessionDialog } from "@/components/sessions/EndSessionDialog";
 import { differenceInMinutes } from "date-fns";
 
 export default function Tables() {
+  const { isAdmin } = useAuth();
   const { tables, isLoading, updateTableStatus, createTable, updateTable, deleteTable } = useTables();
   const { activeSessions, startSession, pauseSession, resumeSession, endSession } = useSessions();
   const { customers } = useCustomers();
