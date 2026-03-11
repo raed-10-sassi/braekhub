@@ -168,8 +168,6 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">Table {session.tables.table_number}</span>
-                    <span className="text-sm text-muted-foreground">•</span>
-                    <span className="text-sm">{session.customers.name}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge
