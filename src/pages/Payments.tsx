@@ -92,6 +92,7 @@ export default function Payments() {
         paymentMethod: o.payment_method,
         notes: "Consumption order",
         isGuest: false,
+        createdBy: o.profiles?.full_name || null,
       });
     });
 
