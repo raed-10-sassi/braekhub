@@ -42,7 +42,7 @@ export function useOrders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, order_items(*, products(name))")
+        .select("*, order_items(*, products(name)), profiles:created_by (full_name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as OrderWithItems[];
