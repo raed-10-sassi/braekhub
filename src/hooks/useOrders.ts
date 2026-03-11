@@ -42,10 +42,25 @@ export function useOrders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, order_items(*, products(name)), profiles:created_by (full_name)")
+        .select("*, order_items(*, products(name))")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as OrderWithItems[];
+      
+      // Fetch profile names for created_by
+      const userIds = [...new Set(data.filter(o => o.created_by).map(o => o.created_by!))];
+      let profileMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+        profiles?.forEach(p => { profileMap[p.id] = p.full_name || "Unknown"; });
+      }
+      
+      return data.map(o => ({
+        ...o,
+        profiles: o.created_by ? { full_name: profileMap[o.created_by] || null } : null,
+      })) as OrderWithItems[];
     },
   });
 

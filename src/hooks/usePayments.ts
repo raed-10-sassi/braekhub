@@ -32,13 +32,27 @@ export function usePayments() {
         .select(`
           *,
           customers!left (name),
-          sessions (id, total_amount),
-          profiles:created_by (full_name)
+          sessions (id, total_amount)
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as PaymentWithRelations[];
+      
+      // Fetch profile names for created_by
+      const userIds = [...new Set(data.filter(p => p.created_by).map(p => p.created_by!))];
+      let profileMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+        profiles?.forEach(p => { profileMap[p.id] = p.full_name || "Unknown"; });
+      }
+      
+      return data.map(p => ({
+        ...p,
+        profiles: p.created_by ? { full_name: profileMap[p.created_by] || null } : null,
+      })) as PaymentWithRelations[];
     },
   });
 
