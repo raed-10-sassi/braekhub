@@ -107,6 +107,7 @@ export default function Payments() {
         paymentMethod: "cash",
         notes: w.comment || "",
         isGuest: false,
+        createdBy: w.profiles?.full_name || null,
       });
     });
 
