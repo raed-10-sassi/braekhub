@@ -8,6 +8,7 @@ export interface CashWithdrawal {
   comment: string | null;
   created_by: string | null;
   created_at: string;
+  profiles?: { full_name: string | null } | null;
 }
 
 export function useCashWithdrawals() {
