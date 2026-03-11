@@ -393,6 +393,7 @@ export default function Payments() {
                 onClick={() => {
                   const rows = filteredEntries.map((e) => ({
                     Date: format(new Date(e.date), "yyyy-MM-dd HH:mm"),
+                    User: e.createdBy || "",
                     Type: e.type,
                     Client: e.name,
                     Montant: e.type === "withdrawal" ? -e.amount : e.amount,
