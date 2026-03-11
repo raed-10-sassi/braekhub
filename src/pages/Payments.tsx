@@ -41,6 +41,7 @@ interface UnifiedEntry {
   paymentMethod: string;
   notes: string;
   isGuest: boolean;
+  createdBy: string | null;
 }
 
 export default function Payments() {
