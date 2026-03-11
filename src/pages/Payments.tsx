@@ -438,6 +438,9 @@ export default function Payments() {
                       <TableCell className="text-muted-foreground">
                         {format(new Date(entry.date), "MMM d, yyyy HH:mm")}
                       </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {entry.createdBy || "-"}
+                      </TableCell>
                       <TableCell>
                         {getEntryTypeBadge(entry) || <Badge variant="secondary" className="text-xs">Payment</Badge>}
                       </TableCell>
