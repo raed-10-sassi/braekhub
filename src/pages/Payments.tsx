@@ -77,6 +77,7 @@ export default function Payments() {
         paymentMethod: p.payment_method,
         notes: p.notes || "",
         isGuest: !p.customers,
+        createdBy: p.profiles?.full_name || null,
       });
     });
 
