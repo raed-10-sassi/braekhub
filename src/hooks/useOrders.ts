@@ -82,6 +82,7 @@ export function useOrders() {
       }
 
       // Create order
+      const { data: { user } } = await supabase.auth.getUser();
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -89,6 +90,7 @@ export function useOrders() {
           payment_method: paymentMethod,
           total_amount: totalAmount,
           customer_id: customerId || null,
+          created_by: user?.id,
         })
         .select()
         .single();

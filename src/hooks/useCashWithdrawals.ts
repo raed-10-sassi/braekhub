@@ -19,7 +19,7 @@ export function useCashWithdrawals() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cash_withdrawals")
-        .select("*")
+        .select("*, profiles:created_by (full_name)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;

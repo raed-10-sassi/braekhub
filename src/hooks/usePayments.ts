@@ -54,9 +54,11 @@ export function usePayments() {
     }) => {
       const { updateCredit, ...paymentData } = payment;
 
+      const { data: { user } } = await supabase.auth.getUser();
+
       const { data, error } = await supabase
         .from("payments")
-        .insert(paymentData)
+        .insert({ ...paymentData, created_by: user?.id })
         .select()
         .single();
 
