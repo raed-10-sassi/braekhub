@@ -8,6 +8,7 @@ export interface CashWithdrawal {
   comment: string | null;
   created_by: string | null;
   created_at: string;
+  profiles?: { full_name: string | null } | null;
 }
 
 export function useCashWithdrawals() {
@@ -23,7 +24,22 @@ export function useCashWithdrawals() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as CashWithdrawal[];
+      
+      // Fetch profile names for created_by
+      const userIds = [...new Set(data.filter(w => w.created_by).map(w => w.created_by!))];
+      let profileMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+        profiles?.forEach(p => { profileMap[p.id] = p.full_name || "Unknown"; });
+      }
+      
+      return data.map(w => ({
+        ...w,
+        profiles: w.created_by ? { full_name: profileMap[w.created_by] || null } : null,
+      })) as CashWithdrawal[];
     },
   });
 

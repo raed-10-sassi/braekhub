@@ -8,6 +8,7 @@ export interface Order {
   payment_method: string;
   total_amount: number;
   created_at: string;
+  created_by: string | null;
 }
 
 export interface OrderItem {
@@ -21,6 +22,7 @@ export interface OrderItem {
 
 export interface OrderWithItems extends Order {
   order_items: (OrderItem & { products: { name: string } })[];
+  profiles: { full_name: string | null } | null;
 }
 
 export interface CartItem {
@@ -43,7 +45,22 @@ export function useOrders() {
         .select("*, order_items(*, products(name))")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as OrderWithItems[];
+      
+      // Fetch profile names for created_by
+      const userIds = [...new Set(data.filter(o => o.created_by).map(o => o.created_by!))];
+      let profileMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+        profiles?.forEach(p => { profileMap[p.id] = p.full_name || "Unknown"; });
+      }
+      
+      return data.map(o => ({
+        ...o,
+        profiles: o.created_by ? { full_name: profileMap[o.created_by] || null } : null,
+      })) as OrderWithItems[];
     },
   });
 
@@ -80,6 +97,7 @@ export function useOrders() {
       }
 
       // Create order
+      const { data: { user } } = await supabase.auth.getUser();
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -87,6 +105,7 @@ export function useOrders() {
           payment_method: paymentMethod,
           total_amount: totalAmount,
           customer_id: customerId || null,
+          created_by: user?.id,
         })
         .select()
         .single();

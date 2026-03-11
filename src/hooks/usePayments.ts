@@ -11,11 +11,13 @@ export interface Payment {
   payment_method: string;
   notes: string | null;
   created_at: string;
+  created_by: string | null;
 }
 
 export interface PaymentWithRelations extends Payment {
   customers: { name: string } | null;
   sessions: { id: string; total_amount: number } | null;
+  profiles: { full_name: string | null } | null;
 }
 
 export function usePayments() {
@@ -35,7 +37,22 @@ export function usePayments() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as PaymentWithRelations[];
+      
+      // Fetch profile names for created_by
+      const userIds = [...new Set(data.filter(p => p.created_by).map(p => p.created_by!))];
+      let profileMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+        profiles?.forEach(p => { profileMap[p.id] = p.full_name || "Unknown"; });
+      }
+      
+      return data.map(p => ({
+        ...p,
+        profiles: p.created_by ? { full_name: profileMap[p.created_by] || null } : null,
+      })) as PaymentWithRelations[];
     },
   });
 
@@ -51,9 +68,11 @@ export function usePayments() {
     }) => {
       const { updateCredit, ...paymentData } = payment;
 
+      const { data: { user } } = await supabase.auth.getUser();
+
       const { data, error } = await supabase
         .from("payments")
-        .insert(paymentData)
+        .insert({ ...paymentData, created_by: user?.id })
         .select()
         .single();
 

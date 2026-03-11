@@ -41,6 +41,7 @@ interface UnifiedEntry {
   paymentMethod: string;
   notes: string;
   isGuest: boolean;
+  createdBy: string | null;
 }
 
 export default function Payments() {
@@ -76,6 +77,7 @@ export default function Payments() {
         paymentMethod: p.payment_method,
         notes: p.notes || "",
         isGuest: !p.customers,
+        createdBy: p.profiles?.full_name || null,
       });
     });
 
@@ -90,6 +92,7 @@ export default function Payments() {
         paymentMethod: o.payment_method,
         notes: "Consumption order",
         isGuest: false,
+        createdBy: o.profiles?.full_name || null,
       });
     });
 
@@ -104,6 +107,7 @@ export default function Payments() {
         paymentMethod: "cash",
         notes: w.comment || "",
         isGuest: false,
+        createdBy: w.profiles?.full_name || null,
       });
     });
 
@@ -389,6 +393,7 @@ export default function Payments() {
                 onClick={() => {
                   const rows = filteredEntries.map((e) => ({
                     Date: format(new Date(e.date), "yyyy-MM-dd HH:mm"),
+                    User: e.createdBy || "",
                     Type: e.type,
                     Client: e.name,
                     Montant: e.type === "withdrawal" ? -e.amount : e.amount,
@@ -418,6 +423,7 @@ export default function Payments() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>User</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
@@ -432,6 +438,9 @@ export default function Payments() {
                     <TableRow key={`${entry.type}-${entry.id}`}>
                       <TableCell className="text-muted-foreground">
                         {format(new Date(entry.date), "MMM d, yyyy HH:mm")}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {entry.createdBy || "-"}
                       </TableCell>
                       <TableCell>
                         {getEntryTypeBadge(entry) || <Badge variant="secondary" className="text-xs">Payment</Badge>}
