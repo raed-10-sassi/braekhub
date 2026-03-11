@@ -30,7 +30,8 @@ export function usePayments() {
         .select(`
           *,
           customers!left (name),
-          sessions (id, total_amount)
+          sessions (id, total_amount),
+          profiles:created_by (full_name)
         `)
         .order("created_at", { ascending: false });
 
