@@ -8,6 +8,7 @@ export interface Order {
   payment_method: string;
   total_amount: number;
   created_at: string;
+  created_by: string | null;
 }
 
 export interface OrderItem {
