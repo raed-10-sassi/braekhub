@@ -422,6 +422,7 @@ export default function Payments() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>User</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
