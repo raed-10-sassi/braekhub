@@ -11,6 +11,7 @@ export interface Payment {
   payment_method: string;
   notes: string | null;
   created_at: string;
+  created_by: string | null;
 }
 
 export interface PaymentWithRelations extends Payment {
