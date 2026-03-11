@@ -22,6 +22,7 @@ export interface OrderItem {
 
 export interface OrderWithItems extends Order {
   order_items: (OrderItem & { products: { name: string } })[];
+  profiles: { full_name: string | null } | null;
 }
 
 export interface CartItem {
