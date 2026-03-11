@@ -16,6 +16,7 @@ export interface Payment {
 export interface PaymentWithRelations extends Payment {
   customers: { name: string } | null;
   sessions: { id: string; total_amount: number } | null;
+  profiles: { full_name: string | null } | null;
 }
 
 export function usePayments() {
