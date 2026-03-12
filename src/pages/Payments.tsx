@@ -470,6 +470,13 @@ export default function Payments() {
                       <TableCell className="text-muted-foreground max-w-[200px] truncate">
                         {entry.notes || "-"}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ id: entry.id, type: entry.type })}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
