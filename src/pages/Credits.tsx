@@ -38,6 +38,7 @@ export default function Credits() {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [selectedGuestName, setSelectedGuestName] = useState<string | null>(null);
   const [selectedGuestMaxAmount, setSelectedGuestMaxAmount] = useState<number>(0);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const customerCreditTotal = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
   const guestCreditTotal = guestCredits.reduce((sum, g) => sum + g.total_owed, 0);
