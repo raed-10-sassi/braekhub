@@ -12,14 +12,6 @@ interface AppUser {
 }
 
 async function callManageUsers(action: string, method: string, body?: any) {
-  const { data, error } = await supabase.functions.invoke("manage-users", {
-    method,
-    body: body || undefined,
-    headers: { "Content-Type": "application/json" },
-  });
-
-  // supabase.functions.invoke passes query params via URL isn't directly supported,
-  // so we use the raw fetch approach with the correct URL from the client
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
