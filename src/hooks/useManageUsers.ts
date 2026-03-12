@@ -15,21 +15,22 @@ async function callManageUsers(action: string, method: string, body?: any) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const url = `https://${projectId}.supabase.co/functions/v1/manage-users?action=${action}`;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const url = `${supabaseUrl}/functions/v1/manage-users?action=${action}`;
 
   const res = await fetch(url, {
     method,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Request failed");
-  return data;
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || "Request failed");
+  return result;
 }
 
 export function useManageUsers() {
