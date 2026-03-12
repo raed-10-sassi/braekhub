@@ -99,9 +99,12 @@ export function useCustomers() {
       });
     },
     onError: (error) => {
+      const isForeignKey = error.message.includes("foreign key constraint");
       toast({
         title: "Erreur lors de la suppression",
-        description: error.message,
+        description: isForeignKey
+          ? "Ce client ne peut pas être supprimé car il a des sessions, paiements ou commandes associés. Veuillez d'abord supprimer ces données."
+          : error.message,
         variant: "destructive",
       });
     },
