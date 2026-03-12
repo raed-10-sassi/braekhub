@@ -400,6 +400,7 @@ export default function Credits() {
                   <TableHead>Date</TableHead>
                   <TableHead>Montant</TableHead>
                   <TableHead>Commentaire</TableHead>
+                  {isAdmin && <TableHead className="text-right">Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
