@@ -31,7 +31,8 @@ export default function Credits() {
   const { createPayment } = usePayments();
   const { guestCredits } = useGuestCredits();
   const { creditNotes } = useCustomerCreditNotes();
-  const { withdrawals, createWithdrawal } = useCashWithdrawals();
+  const { withdrawals, createWithdrawal, deleteWithdrawal } = useCashWithdrawals();
+  const { isAdmin } = useAuth();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
