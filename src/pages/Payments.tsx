@@ -424,6 +424,7 @@ export default function Payments() {
                   <TableHead>Montant</TableHead>
                   <TableHead>Méthode</TableHead>
                   <TableHead>Notes</TableHead>
+                  {isAdmin && <TableHead className="text-right">Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
