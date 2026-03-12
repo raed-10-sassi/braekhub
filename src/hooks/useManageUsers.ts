@@ -56,7 +56,7 @@ export function useManageUsers() {
 
   const updateUser = useMutation({
     mutationFn: (data: { user_id: string; username?: string; full_name?: string; password?: string; role?: string }) =>
-      callManageUsers("update", "PUT", data),
+      callManageUsers("update", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managed-users"] });
       toast({ title: "Utilisateur mis à jour" });
