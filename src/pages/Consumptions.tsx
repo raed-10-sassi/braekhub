@@ -35,8 +35,9 @@ export default function Consumptions() {
     updateProduct,
     deleteProduct,
   } = useProducts();
-  const { orders, isLoading: ordersLoading, createOrder } = useOrders();
+  const { orders, isLoading: ordersLoading, createOrder, deleteOrder } = useOrders();
   const { customers } = useCustomers();
+  const { isAdmin } = useAuth();
 
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
