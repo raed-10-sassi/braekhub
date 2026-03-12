@@ -106,9 +106,6 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
 
   const handlePaymentChange = (value: string) => {
     setPaymentMethod(value);
-    if (value !== "credits") {
-      setCustomerId("");
-    }
   };
 
   return (
