@@ -67,7 +67,7 @@ export function useManageUsers() {
   });
 
   const deleteUser = useMutation({
-    mutationFn: (user_id: string) => callManageUsers("delete", "DELETE", { user_id }),
+    mutationFn: (user_id: string) => callManageUsers("delete", "POST", { user_id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["managed-users"] });
       toast({ title: "Utilisateur supprimé" });

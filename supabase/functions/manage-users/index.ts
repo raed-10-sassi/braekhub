@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
     }
 
     // DELETE user
-    if (req.method === "DELETE" && action === "delete") {
+    if ((req.method === "DELETE" || req.method === "POST") && action === "delete") {
       const { user_id } = await req.json();
 
       if (!user_id) {
