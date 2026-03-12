@@ -52,14 +52,14 @@ export default function Credits() {
         payer_name: selectedGuestName,
         amount: parseFloat(formData.get("amount") as string),
         payment_method: formData.get("payment_method") as string,
-        notes: "Guest credit payment",
+        notes: "Paiement crédit invité",
       });
     } else {
       createPayment.mutate({
         customer_id: formData.get("customer_id") as string,
         amount: parseFloat(formData.get("amount") as string),
         payment_method: formData.get("payment_method") as string,
-        notes: "Credit payment",
+        notes: "Paiement crédit",
         updateCredit: true,
       });
     }
@@ -95,8 +95,8 @@ export default function Credits() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Credits</h1>
-          <p className="text-muted-foreground">Outstanding customer balances & cash withdrawals</p>
+          <h1 className="text-3xl font-bold tracking-tight">Crédits</h1>
+          <p className="text-muted-foreground">Soldes clients impayés & retraits de caisse</p>
         </div>
         <div className="flex gap-2">
           {/* Add Cash Withdrawal Button */}
@@ -104,19 +104,19 @@ export default function Credits() {
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
-                Cash Withdrawal
+                Retrait de caisse
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Banknote className="h-5 w-5" />
-                  Record Cash Withdrawal
+                  Enregistrer un retrait de caisse
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleAddWithdrawal} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="withdrawal-amount">Amount ($)</Label>
+                  <Label htmlFor="withdrawal-amount">Montant (DT)</Label>
                   <Input
                     id="withdrawal-amount"
                     name="amount"
@@ -128,16 +128,16 @@ export default function Credits() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="withdrawal-comment">Comment</Label>
+                  <Label htmlFor="withdrawal-comment">Commentaire</Label>
                   <Textarea
                     id="withdrawal-comment"
                     name="comment"
-                    placeholder="Reason for withdrawal..."
+                    placeholder="Raison du retrait..."
                     rows={2}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={createWithdrawal.isPending}>
-                  Save Withdrawal
+                  Enregistrer le retrait
                 </Button>
               </form>
             </DialogContent>
@@ -152,29 +152,29 @@ export default function Credits() {
               <DialogTrigger asChild>
                 <Button>
                   <DollarSign className="h-4 w-4 mr-2" />
-                  Collect Payment
+                  Encaisser
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
                     {isGuestPayment
-                      ? `Collect from ${selectedGuestName}`
-                      : "Collect Credit Payment"}
+                      ? `Encaisser de ${selectedGuestName}`
+                      : "Encaisser un paiement crédit"}
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handlePayCredit} className="space-y-4">
                   {!isGuestPayment && (
                     <div className="space-y-2">
-                      <Label>Customer</Label>
+                      <Label>Client</Label>
                       <Select name="customer_id" defaultValue={selectedCustomer || undefined} required>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select customer" />
+                          <SelectValue placeholder="Sélectionner un client" />
                         </SelectTrigger>
                         <SelectContent>
                           {customersWithCredit.map((customer) => (
                             <SelectItem key={customer.id} value={customer.id}>
-                              {customer.name} (${customer.credit_balance.toFixed(2)})
+                              {customer.name} ({customer.credit_balance.toFixed(2)} DT)
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -183,11 +183,11 @@ export default function Credits() {
                   )}
                   {isGuestPayment && (
                     <p className="text-sm text-muted-foreground">
-                      Outstanding: <span className="font-semibold text-foreground">${selectedGuestMaxAmount.toFixed(2)}</span>
+                      En cours : <span className="font-semibold text-foreground">{selectedGuestMaxAmount.toFixed(2)} DT</span>
                     </p>
                   )}
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Payment Amount ($)</Label>
+                    <Label htmlFor="amount">Montant du paiement (DT)</Label>
                     <Input
                       id="amount"
                       name="amount"
@@ -199,20 +199,20 @@ export default function Credits() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Payment Method</Label>
+                    <Label>Mode de paiement</Label>
                     <Select name="payment_method" defaultValue="cash">
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="cash">Cash</SelectItem>
-                        <SelectItem value="card">Card</SelectItem>
-                        <SelectItem value="mobile">Mobile Payment</SelectItem>
+                        <SelectItem value="cash">Espèces</SelectItem>
+                        <SelectItem value="card">Carte</SelectItem>
+                        <SelectItem value="mobile">Paiement mobile</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <Button type="submit" className="w-full" disabled={createPayment.isPending}>
-                    Collect Payment
+                    Encaisser
                   </Button>
                 </form>
               </DialogContent>
@@ -226,13 +226,13 @@ export default function Credits() {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-warning">
             <AlertCircle className="h-5 w-5" />
-            Total Outstanding
+            Total en cours
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-4xl font-bold">${totalCredit.toFixed(2)}</div>
+          <div className="text-4xl font-bold">{totalCredit.toFixed(2)} DT</div>
           <p className="text-muted-foreground mt-1">
-            From {totalEntries} {totalEntries !== 1 ? "entries" : "entry"}
+            De {totalEntries} {totalEntries !== 1 ? "entrées" : "entrée"}
           </p>
         </CardContent>
       </Card>
@@ -240,8 +240,8 @@ export default function Credits() {
       {/* Credits List */}
       <Card>
         <CardHeader>
-          <CardTitle>Outstanding Credits</CardTitle>
-          <CardDescription>Customers and guests with unpaid balances</CardDescription>
+          <CardTitle>Crédits en cours</CardTitle>
+          <CardDescription>Clients et invités avec des soldes impayés</CardDescription>
         </CardHeader>
         <CardContent>
           {totalEntries === 0 ? (
@@ -249,18 +249,18 @@ export default function Credits() {
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-success/10 mb-4">
                 <DollarSign className="h-8 w-8 text-success" />
               </div>
-              <h3 className="text-lg font-medium">All Clear!</h3>
-              <p className="text-muted-foreground">No outstanding credits</p>
+              <h3 className="text-lg font-medium">Tout est réglé !</h3>
+              <p className="text-muted-foreground">Aucun crédit en cours</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Nom</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Comment</TableHead>
-                  <TableHead>Since</TableHead>
+                  <TableHead>Solde</TableHead>
+                  <TableHead>Commentaire</TableHead>
+                  <TableHead>Depuis</TableHead>
                   <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
@@ -277,11 +277,11 @@ export default function Credits() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">Customer</Badge>
+                      <Badge variant="outline">Client</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant="destructive" className="font-mono text-base">
-                        ${customer.credit_balance.toFixed(2)}
+                        {customer.credit_balance.toFixed(2)} DT
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -304,7 +304,7 @@ export default function Credits() {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(customer.updated_at), "MMM d, yyyy")}
+                      {format(new Date(customer.updated_at), "d MMM yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -312,7 +312,7 @@ export default function Credits() {
                         variant="outline"
                         onClick={() => openPaymentForCustomer(customer.id)}
                       >
-                        Collect
+                        Encaisser
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -322,18 +322,18 @@ export default function Credits() {
                     <TableCell>
                       <div className="font-medium">{guest.customer_name}</div>
                       <div className="text-xs text-muted-foreground">
-                        {guest.order_count} order{guest.order_count !== 1 ? "s" : ""}
+                        {guest.order_count} commande{guest.order_count !== 1 ? "s" : ""}
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="gap-1">
                         <User className="h-3 w-3" />
-                        Guest
+                        Invité
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant="destructive" className="font-mono text-base">
-                        ${guest.total_owed.toFixed(2)}
+                        {guest.total_owed.toFixed(2)} DT
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -356,7 +356,7 @@ export default function Credits() {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(guest.latest_order), "MMM d, yyyy")}
+                      {format(new Date(guest.latest_order), "d MMM yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -364,7 +364,7 @@ export default function Credits() {
                         variant="outline"
                         onClick={() => openPaymentForGuest(guest.customer_name, guest.total_owed)}
                       >
-                        Collect
+                        Encaisser
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -380,33 +380,33 @@ export default function Credits() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Cash Withdrawal History
+            Historique des retraits de caisse
           </CardTitle>
-          <CardDescription>Manual cash withdrawals from the register</CardDescription>
+          <CardDescription>Retraits manuels de la caisse</CardDescription>
         </CardHeader>
         <CardContent>
           {withdrawals.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No cash withdrawals recorded yet</p>
+              <p className="text-muted-foreground">Aucun retrait enregistré</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Comment</TableHead>
+                  <TableHead>Montant</TableHead>
+                  <TableHead>Commentaire</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {withdrawals.map((w) => (
                   <TableRow key={w.id}>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(w.created_at), "MMM d, yyyy HH:mm")}
+                      {format(new Date(w.created_at), "d MMM yyyy HH:mm")}
                     </TableCell>
                     <TableCell>
                       <Badge variant="destructive" className="font-mono">
-                        ${w.amount.toFixed(2)}
+                        {w.amount.toFixed(2)} DT
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">

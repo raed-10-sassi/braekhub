@@ -62,7 +62,6 @@ export default function Tables() {
   const handleCreateVideoGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    // Use a high table_number to avoid conflicts
     const existingNumbers = tables.map((t) => t.table_number);
     const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 100;
     createTable.mutate({
@@ -148,7 +147,7 @@ export default function Tables() {
           payer_name: payerName,
           amount: endSessionData.totalAmount,
           payment_method: "credits",
-          notes: notes || "Session credit",
+          notes: notes || "Crédit de session",
         });
       } else {
         createPayment.mutate({
@@ -156,7 +155,7 @@ export default function Tables() {
           payer_name: payerName,
           amount: endSessionData.totalAmount,
           payment_method: "credits",
-          notes: notes || "Session credit",
+          notes: notes || "Crédit de session",
         });
       }
     } else {
@@ -208,34 +207,34 @@ export default function Tables() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tables</h1>
-          <p className="text-muted-foreground">Manage your pool tables</p>
+          <p className="text-muted-foreground">Gérer vos tables de billard</p>
         </div>
         <Dialog open={newTableOpen} onOpenChange={setNewTableOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Table
+              Ajouter une table
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Table</DialogTitle>
+              <DialogTitle>Ajouter une nouvelle table</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateTable} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Table Name</Label>
-                <Input id="name" name="name" placeholder="VIP Table" required />
+                <Label htmlFor="name">Nom de la table</Label>
+                <Input id="name" name="name" placeholder="Table VIP" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="table_number">Table Number</Label>
+                <Label htmlFor="table_number">Numéro de table</Label>
                 <Input id="table_number" name="table_number" type="number" min="1" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="hourly_rate">Hourly Rate ($)</Label>
+                <Label htmlFor="hourly_rate">Tarif horaire (DT)</Label>
                 <Input id="hourly_rate" name="hourly_rate" type="number" step="0.01" defaultValue="15.00" required />
               </div>
               <Button type="submit" className="w-full" disabled={createTable.isPending}>
-                Create Table
+                Créer la table
               </Button>
             </form>
           </DialogContent>
@@ -260,32 +259,32 @@ export default function Tables() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Gamepad2 className="h-6 w-6" />
-            Video Games
+            Jeux Vidéo
           </h2>
-          <p className="text-muted-foreground">Manage your video game stations</p>
+          <p className="text-muted-foreground">Gérer vos stations de jeux vidéo</p>
         </div>
         <Dialog open={newVideoGameOpen} onOpenChange={setNewVideoGameOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Video Game
+              Ajouter un jeu
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Video Game</DialogTitle>
+              <DialogTitle>Ajouter un nouveau jeu vidéo</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateVideoGame} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="vg-name">Game Name</Label>
-                <Input id="vg-name" name="name" placeholder="PS5 Station" required />
+                <Label htmlFor="vg-name">Nom du jeu</Label>
+                <Input id="vg-name" name="name" placeholder="Station PS5" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="vg-hourly_rate">Hourly Rate ($)</Label>
+                <Label htmlFor="vg-hourly_rate">Tarif horaire (DT)</Label>
                 <Input id="vg-hourly_rate" name="hourly_rate" type="number" step="0.01" defaultValue="10.00" required />
               </div>
               <Button type="submit" className="w-full" disabled={createTable.isPending}>
-                Create Video Game
+                Créer le jeu vidéo
               </Button>
             </form>
           </DialogContent>

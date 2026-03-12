@@ -30,14 +30,14 @@ export function OrderFilters({
     <div className="flex flex-wrap items-center gap-3">
       <Select value={preset} onValueChange={(v) => onPresetChange(v as FilterPreset)}>
         <SelectTrigger className="w-[160px]">
-          <SelectValue placeholder="Filter by time" />
+          <SelectValue placeholder="Filtrer par période" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All time</SelectItem>
-          <SelectItem value="today">Today</SelectItem>
-          <SelectItem value="week">This week</SelectItem>
-          <SelectItem value="month">This month</SelectItem>
-          <SelectItem value="custom">Custom range</SelectItem>
+          <SelectItem value="all">Tout le temps</SelectItem>
+          <SelectItem value="today">Aujourd'hui</SelectItem>
+          <SelectItem value="week">Cette semaine</SelectItem>
+          <SelectItem value="month">Ce mois</SelectItem>
+          <SelectItem value="custom">Période personnalisée</SelectItem>
         </SelectContent>
       </Select>
 
@@ -53,7 +53,7 @@ export function OrderFilters({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                {dateFrom ? format(dateFrom, "d MMM yyyy") : "Du"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -77,7 +77,7 @@ export function OrderFilters({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                {dateTo ? format(dateTo, "d MMM yyyy") : "Au"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">

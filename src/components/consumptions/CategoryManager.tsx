@@ -37,14 +37,14 @@ export function CategoryManager({ categories, onAdd, onDelete, isPending }: Cate
     <div className="space-y-3">
       <form onSubmit={handleAdd} className="flex gap-2">
         <Input
-          placeholder="New category name..."
+          placeholder="Nom de la nouvelle catégorie..."
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           className="flex-1"
         />
         <Button type="submit" size="sm" disabled={isPending || !newName.trim()}>
           <Plus className="h-4 w-4 mr-1" />
-          Add
+          Ajouter
         </Button>
       </form>
       <div className="flex flex-wrap gap-2">
@@ -60,21 +60,21 @@ export function CategoryManager({ categories, onAdd, onDelete, isPending }: Cate
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete category "{cat.name}"?</AlertDialogTitle>
+                  <AlertDialogTitle>Supprimer la catégorie "{cat.name}" ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will also delete all products in this category.
+                    Cela supprimera aussi tous les produits de cette catégorie.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(cat.id)}>Delete</AlertDialogAction>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDelete(cat.id)}>Supprimer</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </Badge>
         ))}
         {categories.length === 0 && (
-          <p className="text-sm text-muted-foreground">No categories yet. Add one above.</p>
+          <p className="text-sm text-muted-foreground">Aucune catégorie. Ajoutez-en une ci-dessus.</p>
         )}
       </div>
     </div>

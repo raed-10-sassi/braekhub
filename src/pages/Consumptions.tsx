@@ -69,17 +69,17 @@ export default function Consumptions() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Consumptions</h1>
-          <p className="text-muted-foreground">Manage products, stock & sales</p>
+          <h1 className="text-3xl font-bold tracking-tight">Consommations</h1>
+          <p className="text-muted-foreground">Gérer les produits, le stock & les ventes</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setAddProductOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Product
+            Ajouter un produit
           </Button>
           <Button onClick={() => setNewOrderOpen(true)}>
             <ShoppingCart className="h-4 w-4 mr-2" />
-            New Order
+            Nouvelle commande
           </Button>
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function Consumptions() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total produits</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{products.length}</p>
@@ -96,7 +96,7 @@ export default function Consumptions() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Categories</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Catégories</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{categories.length}</p>
@@ -104,7 +104,7 @@ export default function Consumptions() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Low Stock</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Stock faible</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-warning">{lowStockCount}</p>
@@ -112,10 +112,10 @@ export default function Consumptions() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Today's Sales</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Ventes du jour</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">${todayRevenue.toFixed(2)}</p>
+            <p className="text-2xl font-bold">{todayRevenue.toFixed(2)} DT</p>
           </CardContent>
         </Card>
       </div>
@@ -124,11 +124,11 @@ export default function Consumptions() {
         <TabsList>
           <TabsTrigger value="products">
             <Package className="h-4 w-4 mr-2" />
-            Products
+            Produits
           </TabsTrigger>
           <TabsTrigger value="orders">
             <ShoppingCart className="h-4 w-4 mr-2" />
-            Order History
+            Historique des commandes
           </TabsTrigger>
         </TabsList>
 
@@ -136,7 +136,7 @@ export default function Consumptions() {
           {/* Categories */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Categories</CardTitle>
+              <CardTitle className="text-lg">Catégories</CardTitle>
             </CardHeader>
             <CardContent>
               <CategoryManager
@@ -171,9 +171,9 @@ export default function Consumptions() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Payment</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Articles</TableHead>
+                  <TableHead>Paiement</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -181,16 +181,16 @@ export default function Consumptions() {
                 {filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No orders found
+                      Aucune commande trouvée
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="text-sm">
-                        {format(new Date(order.created_at), "MMM d, HH:mm")}
+                        {format(new Date(order.created_at), "d MMM, HH:mm")}
                       </TableCell>
-                      <TableCell>{order.customer_name || "Guest"}</TableCell>
+                      <TableCell>{order.customer_name || "Invité"}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {order.order_items?.map((item) => (
@@ -204,7 +204,7 @@ export default function Consumptions() {
                         <Badge variant="outline" className="capitalize">{order.payment_method}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-mono font-bold">
-                        ${order.total_amount.toFixed(2)}
+                        {order.total_amount.toFixed(2)} DT
                       </TableCell>
                     </TableRow>
                   ))
@@ -215,10 +215,10 @@ export default function Consumptions() {
           {filteredOrders.length > 0 && (
             <div className="flex items-center justify-between rounded-md border bg-muted/50 px-4 py-3">
               <span className="text-sm text-muted-foreground">
-                {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+                {filteredOrders.length} commande{filteredOrders.length !== 1 ? "s" : ""}
               </span>
               <span className="text-lg font-bold font-mono">
-                Total: ${filteredOrders.reduce((sum, o) => sum + o.total_amount, 0).toFixed(2)}
+                Total : {filteredOrders.reduce((sum, o) => sum + o.total_amount, 0).toFixed(2)} DT
               </span>
             </div>
           )}

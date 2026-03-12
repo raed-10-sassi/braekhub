@@ -45,15 +45,15 @@ export function EditProductDialog({ open, onOpenChange, product, categories, onS
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Product</DialogTitle>
+          <DialogTitle>Modifier le produit</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Name</Label>
+            <Label htmlFor="edit-name">Nom</Label>
             <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="edit-category">Category</Label>
+            <Label htmlFor="edit-category">Catégorie</Label>
             <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger>
                 <SelectValue />
@@ -67,7 +67,7 @@ export function EditProductDialog({ open, onOpenChange, product, categories, onS
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Price ($)</Label>
+              <Label htmlFor="edit-price">Prix (DT)</Label>
               <Input id="edit-price" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
             </div>
             <div className="space-y-2">
@@ -76,8 +76,8 @@ export function EditProductDialog({ open, onOpenChange, product, categories, onS
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" className="flex-1">Save</Button>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>Annuler</Button>
+            <Button type="submit" className="flex-1">Enregistrer</Button>
           </div>
         </form>
       </DialogContent>

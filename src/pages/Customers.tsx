@@ -38,39 +38,39 @@ export default function Customers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
-          <p className="text-muted-foreground">Manage your customer database</p>
+          <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
+          <p className="text-muted-foreground">Gérer votre base de données clients</p>
         </div>
         <Dialog open={newCustomerOpen} onOpenChange={setNewCustomerOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Customer
+              Ajouter un client
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Customer</DialogTitle>
+              <DialogTitle>Ajouter un nouveau client</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateCustomer} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input id="name" name="name" placeholder="John Doe" required />
+                <Label htmlFor="name">Nom *</Label>
+                <Input id="name" name="name" placeholder="Jean Dupont" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" name="phone" type="tel" placeholder="+1 234 567 8900" />
+                <Label htmlFor="phone">Téléphone</Label>
+                <Input id="phone" name="phone" type="tel" placeholder="+216 XX XXX XXX" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="john@example.com" />
+                <Input id="email" name="email" type="email" placeholder="jean@exemple.com" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" name="notes" placeholder="Any additional notes..." />
+                <Textarea id="notes" name="notes" placeholder="Notes supplémentaires..." />
               </div>
               <Button type="submit" className="w-full" disabled={createCustomer.isPending}>
-                Create Customer
+                Créer le client
               </Button>
             </form>
           </DialogContent>
@@ -79,8 +79,8 @@ export default function Customers() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Customers</CardTitle>
-          <CardDescription>{customers.length} total customers</CardDescription>
+          <CardTitle>Tous les clients</CardTitle>
+          <CardDescription>{customers.length} clients au total</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -90,15 +90,15 @@ export default function Customers() {
               ))}
             </div>
           ) : customers.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No customers yet. Add your first customer!</p>
+            <p className="text-muted-foreground text-center py-8">Aucun client. Ajoutez votre premier client !</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Nom</TableHead>
                   <TableHead>Contact</TableHead>
-                  <TableHead>Credit Balance</TableHead>
-                  <TableHead>Joined</TableHead>
+                  <TableHead>Solde crédit</TableHead>
+                  <TableHead>Inscrit le</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -127,24 +127,23 @@ export default function Customers() {
                           </div>
                         )}
                         {!customer.phone && !customer.email && (
-                          <span className="text-muted-foreground text-sm">No contact info</span>
+                          <span className="text-muted-foreground text-sm">Pas de contact</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
                       {customer.credit_balance > 0 ? (
                         <Badge variant="destructive" className="font-mono">
-                          <DollarSign className="h-3 w-3" />
-                          {customer.credit_balance.toFixed(2)}
+                          {customer.credit_balance.toFixed(2)} DT
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="font-mono">
-                          $0.00
+                          0.00 DT
                         </Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(customer.created_at), "MMM d, yyyy")}
+                      {format(new Date(customer.created_at), "d MMM yyyy")}
                     </TableCell>
                   </TableRow>
                 ))}

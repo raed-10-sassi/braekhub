@@ -23,10 +23,10 @@ import { CartItem } from "@/hooks/useOrders";
 import { Customer } from "@/hooks/useCustomers";
 
 const PAYMENT_METHODS = [
-  { value: "cash", label: "Cash" },
-  { value: "card", label: "Card" },
-  { value: "mobile", label: "Mobile Payment" },
-  { value: "credits", label: "Credits" },
+  { value: "cash", label: "Espèces" },
+  { value: "card", label: "Carte" },
+  { value: "mobile", label: "Paiement mobile" },
+  { value: "credits", label: "Crédits" },
 ];
 
 interface NewOrderDialogProps {
@@ -117,16 +117,16 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            New Order
+            Nouvelle commande
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Product picker */}
           <div className="space-y-2">
-            <Label>Add Items</Label>
+            <Label>Ajouter des articles</Label>
             <Input
-              placeholder="Search products..."
+              placeholder="Rechercher des produits..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -144,13 +144,13 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
                       <Badge variant="outline" className="text-xs">{p.product_categories?.name}</Badge>
                     </span>
                     <span className="flex items-center gap-3">
-                      <span className="text-muted-foreground text-xs">Stock: {p.stock_quantity}</span>
-                      <span className="font-mono font-bold">${p.price.toFixed(2)}</span>
+                      <span className="text-muted-foreground text-xs">Stock : {p.stock_quantity}</span>
+                      <span className="font-mono font-bold">{p.price.toFixed(2)} DT</span>
                     </span>
                   </button>
                 ))}
                 {availableProducts.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-4">No products available</p>
+                  <p className="text-center text-sm text-muted-foreground py-4">Aucun produit disponible</p>
                 )}
               </div>
             </ScrollArea>
@@ -159,7 +159,7 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
           {/* Cart */}
           {cart.length > 0 && (
             <div className="space-y-2">
-              <Label>Cart ({cart.length} items)</Label>
+              <Label>Panier ({cart.length} articles)</Label>
               <div className="border rounded-md divide-y">
                 {cart.map((item) => (
                   <div key={item.product_id} className="flex items-center justify-between px-3 py-2">
@@ -186,7 +186,7 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
                         <Plus className="h-3 w-3" />
                       </Button>
                       <span className="font-mono text-sm w-16 text-right">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {(item.price * item.quantity).toFixed(2)} DT
                       </span>
                     </div>
                   </div>
@@ -194,7 +194,7 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
               </div>
               <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
                 <span className="font-medium">Total</span>
-                <span className="text-xl font-bold">${total.toFixed(2)}</span>
+                <span className="text-xl font-bold">{total.toFixed(2)} DT</span>
               </div>
             </div>
           )}
@@ -202,7 +202,7 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
           {/* Customer & Payment */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Payment Method</Label>
+              <Label>Mode de paiement</Label>
               <Select value={paymentMethod} onValueChange={handlePaymentChange}>
                 <SelectTrigger>
                   <SelectValue />
@@ -216,24 +216,24 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
             </div>
             {isCredits ? (
               <div className="space-y-2">
-                <Label>Customer</Label>
+                <Label>Client</Label>
                 <Select value={customerId} onValueChange={setCustomerId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select or leave empty for new..." />
+                    <SelectValue placeholder="Sélectionner ou laisser vide..." />
                   </SelectTrigger>
                   <SelectContent>
                     {customers.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name} — ${c.credit_balance.toFixed(2)}
+                        {c.name} — {c.credit_balance.toFixed(2)} DT
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {!customerId && (
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">New guest name (will auto-register)</Label>
+                    <Label className="text-xs text-muted-foreground">Nom invité (sera auto-enregistré)</Label>
                     <Input
-                      placeholder="Guest name..."
+                      placeholder="Nom de l'invité..."
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                     />
@@ -242,18 +242,18 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
                 {selectedCustomer && (
                   <div className="flex items-center gap-2 text-xs">
                     <Wallet className="h-3 w-3" />
-                    <span>Balance: <span className="font-bold">${selectedCustomer.credit_balance.toFixed(2)}</span></span>
+                    <span>Solde : <span className="font-bold">{selectedCustomer.credit_balance.toFixed(2)} DT</span></span>
                     {willGoNegative && (
-                      <Badge variant="secondary" className="text-xs">Will be charged from credits</Badge>
+                      <Badge variant="secondary" className="text-xs">Sera débité des crédits</Badge>
                     )}
                   </div>
                 )}
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>Customer Name (optional)</Label>
+                <Label>Nom du client (optionnel)</Label>
                 <Input
-                  placeholder="Guest"
+                  placeholder="Invité"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                 />
@@ -263,14 +263,14 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
 
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => handleOpenChange(false)}>
-              Cancel
+              Annuler
             </Button>
             <Button
               className="flex-1"
               onClick={handleConfirm}
               disabled={isPending || !canConfirm}
             >
-              Confirm Sale — ${total.toFixed(2)}
+              Confirmer — {total.toFixed(2)} DT
             </Button>
           </div>
         </div>

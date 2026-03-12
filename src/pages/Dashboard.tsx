@@ -78,36 +78,36 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your billiard hall operations</p>
+        <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+        <p className="text-muted-foreground">Vue d'ensemble de vos opérations</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Active Sessions"
+          title="Sessions actives"
           value={activeSessions.length}
-          description={`${occupiedTables} of ${tables.length} tables in use`}
+          description={`${occupiedTables} sur ${tables.length} tables occupées`}
           icon={Clock}
           variant={activeSessions.length > 0 ? "success" : "default"}
         />
         <StatCard
-          title="Available Tables"
+          title="Tables disponibles"
           value={availableTables}
-          description={`${tables.length} total tables`}
+          description={`${tables.length} tables au total`}
           icon={Grid3X3}
         />
         <StatCard
-          title="Today's Revenue"
-          value={`$${netTodayTotal.toFixed(2)}`}
-          description={`${todayPayments.length} payments${todayWithdrawalsTotal > 0 ? ` - $${todayWithdrawalsTotal.toFixed(2)} withdrawals` : ""}`}
+          title="Revenu du jour"
+          value={`${netTodayTotal.toFixed(2)} DT`}
+          description={`${todayPayments.length} paiements${todayWithdrawalsTotal > 0 ? ` - ${todayWithdrawalsTotal.toFixed(2)} DT retraits` : ""}`}
           icon={DollarSign}
           variant="success"
         />
         <StatCard
-          title="Outstanding Credit"
-          value={`$${totalCredit.toFixed(2)}`}
-          description={`${customersWithCredit.length} customers`}
+          title="Crédits en cours"
+          value={`${totalCredit.toFixed(2)} DT`}
+          description={`${customersWithCredit.length} clients`}
           icon={AlertCircle}
           variant={totalCredit > 0 ? "warning" : "default"}
         />
@@ -118,16 +118,16 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Outstanding Credits</CardTitle>
-              <CardDescription>Customers with unpaid balances</CardDescription>
+              <CardTitle className="text-lg">Crédits en cours</CardTitle>
+              <CardDescription>Clients avec des soldes impayés</CardDescription>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link to="/credits">View All</Link>
+              <Link to="/credits">Voir tout</Link>
             </Button>
           </CardHeader>
           <CardContent>
             {customersWithCredit.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-6">No outstanding credits</p>
+              <p className="text-muted-foreground text-sm text-center py-6">Aucun crédit en cours</p>
             ) : (
               <div className="space-y-3">
                 {customersWithCredit.slice(0, 5).map((customer) => (
@@ -137,10 +137,10 @@ export default function Dashboard() {
                   >
                     <div>
                       <p className="font-medium">{customer.name}</p>
-                      <p className="text-xs text-muted-foreground">{customer.phone || "No phone"}</p>
+                      <p className="text-xs text-muted-foreground">{customer.phone || "Pas de téléphone"}</p>
                     </div>
                     <Badge variant="destructive" className="font-mono">
-                      ${customer.credit_balance.toFixed(2)}
+                      {customer.credit_balance.toFixed(2)} DT
                     </Badge>
                   </div>
                 ))}
@@ -153,12 +153,12 @@ export default function Dashboard() {
       {/* Today's Activity */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Today's Activity</CardTitle>
-          <CardDescription>{todaySessions.length} sessions today</CardDescription>
+          <CardTitle className="text-lg">Activité du jour</CardTitle>
+          <CardDescription>{todaySessions.length} sessions aujourd'hui</CardDescription>
         </CardHeader>
         <CardContent>
           {todaySessions.length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-6">No sessions today yet</p>
+            <p className="text-muted-foreground text-sm text-center py-6">Aucune session aujourd'hui</p>
           ) : (
             <div className="space-y-2">
               {todaySessions.slice(0, 10).map((session) => (
@@ -174,10 +174,10 @@ export default function Dashboard() {
                       variant={session.status === "active" ? "default" : "secondary"}
                       className={session.status === "active" ? "bg-success text-success-foreground" : ""}
                     >
-                      {session.status}
+                      {session.status === "active" ? "active" : session.status === "completed" ? "terminée" : session.status}
                     </Badge>
                     {session.status === "completed" && (
-                      <span className="text-sm font-mono">${session.total_amount.toFixed(2)}</span>
+                      <span className="text-sm font-mono">{session.total_amount.toFixed(2)} DT</span>
                     )}
                   </div>
                 </div>
