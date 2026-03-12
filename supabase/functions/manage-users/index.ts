@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
     }
 
     // UPDATE user
-    if (req.method === "PUT" && action === "update") {
+    if ((req.method === "PUT" || req.method === "POST") && action === "update") {
       const { user_id, username, full_name, password, role } = await req.json();
 
       if (!user_id) {
