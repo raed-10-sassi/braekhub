@@ -71,9 +71,27 @@ export function useCashWithdrawals() {
     },
   });
 
+  const deleteWithdrawal = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("cash_withdrawals")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cash-withdrawals"] });
+      toast({ title: "Retrait supprimé", description: "Le retrait a été supprimé avec succès." });
+    },
+    onError: (error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
   return {
     withdrawals: query.data || [],
     isLoading: query.isLoading,
     createWithdrawal,
+    deleteWithdrawal,
   };
 }

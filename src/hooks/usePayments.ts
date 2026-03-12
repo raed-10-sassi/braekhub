@@ -164,6 +164,23 @@ export function usePayments() {
 
   const todayTotal = todayPayments.reduce((sum, p) => sum + p.amount, 0);
 
+  const deletePayment = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("payments")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      toast({ title: "Paiement supprimé", description: "Le paiement a été supprimé avec succès." });
+    },
+    onError: (error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
   return {
     payments: paymentsQuery.data || [],
     todayPayments,
@@ -172,6 +189,7 @@ export function usePayments() {
     error: paymentsQuery.error,
     createPayment,
     addCreditToCustomer,
+    deletePayment,
     refetch: paymentsQuery.refetch,
   };
 }
