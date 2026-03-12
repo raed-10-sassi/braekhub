@@ -57,6 +57,7 @@ export default function Payments() {
   const [filterTo, setFilterTo] = useState<Date | undefined>(undefined);
   const [filterFromTime, setFilterFromTime] = useState("00:00");
   const [filterToTime, setFilterToTime] = useState("23:59");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; type: "payment" | "order" | "withdrawal" } | null>(null);
 
   const buildDateWithTime = (date: Date, time: string) => {
     const [h, m] = time.split(":").map(Number);
