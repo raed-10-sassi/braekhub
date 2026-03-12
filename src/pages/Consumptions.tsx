@@ -211,6 +211,13 @@ export default function Consumptions() {
                       <TableCell className="text-right font-mono font-bold">
                         {order.total_amount.toFixed(2)} DT
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(order.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
