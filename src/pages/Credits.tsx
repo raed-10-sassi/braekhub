@@ -417,6 +417,13 @@ export default function Credits() {
                     <TableCell className="text-muted-foreground">
                       {w.comment || <span className="text-muted-foreground/50">—</span>}
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(w.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
