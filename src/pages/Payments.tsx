@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download, ShoppingCart, ArrowDownCircle } from "lucide-react";
+import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download, ShoppingCart, ArrowDownCircle, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
