@@ -179,6 +179,7 @@ export default function Consumptions() {
                   <TableHead>Articles</TableHead>
                   <TableHead>Paiement</TableHead>
                   <TableHead className="text-right">Total</TableHead>
+                  {isAdmin && <TableHead className="text-right">Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
