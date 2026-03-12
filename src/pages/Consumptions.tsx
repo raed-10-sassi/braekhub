@@ -185,7 +185,7 @@ export default function Consumptions() {
               <TableBody>
                 {filteredOrders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={isAdmin ? 6 : 5} className="text-center py-8 text-muted-foreground">
                       Aucune commande trouvée
                     </TableCell>
                   </TableRow>
