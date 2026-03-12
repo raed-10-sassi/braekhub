@@ -116,6 +116,7 @@ export function useCustomers() {
     error: customersQuery.error,
     createCustomer,
     updateCustomer,
+    deleteCustomer,
     refetch: customersQuery.refetch,
   };
 }
