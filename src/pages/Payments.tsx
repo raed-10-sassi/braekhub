@@ -16,6 +16,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useOrders } from "@/hooks/useOrders";
 import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
+import { useAuth } from "@/contexts/AuthContext";
 import { format, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
