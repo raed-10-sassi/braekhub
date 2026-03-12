@@ -69,13 +69,38 @@ export function useCustomers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast({
-        title: "Customer updated",
-        description: "Customer information has been updated.",
+        title: "Client mis à jour",
+        description: "Les informations du client ont été mises à jour.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error updating customer",
+        title: "Erreur lors de la mise à jour",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteCustomer = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("customers")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast({
+        title: "Client supprimé",
+        description: "Le client a été supprimé avec succès.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur lors de la suppression",
         description: error.message,
         variant: "destructive",
       });
@@ -91,6 +116,7 @@ export function useCustomers() {
     error: customersQuery.error,
     createCustomer,
     updateCustomer,
+    deleteCustomer,
     refetch: customersQuery.refetch,
   };
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Phone, Mail, DollarSign } from "lucide-react";
+import { Plus, Phone, Mail, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCustomers } from "@/hooks/useCustomers";
+import { useCustomers, Customer } from "@/hooks/useCustomers";
 import {
   Table,
   TableBody,
@@ -16,11 +16,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 
 export default function Customers() {
-  const { customers, isLoading, createCustomer } = useCustomers();
+  const { customers, isLoading, createCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [newCustomerOpen, setNewCustomerOpen] = useState(false);
+  const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
   const handleCreateCustomer = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,6 +44,26 @@ export default function Customers() {
       notes: (formData.get("notes") as string) || null,
     });
     setNewCustomerOpen(false);
+  };
+
+  const handleEditCustomer = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editCustomer) return;
+    const formData = new FormData(e.currentTarget);
+    updateCustomer.mutate({
+      id: editCustomer.id,
+      name: formData.get("name") as string,
+      phone: (formData.get("phone") as string) || null,
+      email: (formData.get("email") as string) || null,
+      notes: (formData.get("notes") as string) || null,
+    });
+    setEditCustomer(null);
+  };
+
+  const handleDeleteCustomer = () => {
+    if (!deleteTarget) return;
+    deleteCustomer.mutate(deleteTarget.id);
+    setDeleteTarget(null);
   };
 
   return (
@@ -77,6 +109,56 @@ export default function Customers() {
         </Dialog>
       </div>
 
+      {/* Edit Dialog */}
+      <Dialog open={!!editCustomer} onOpenChange={(open) => !open && setEditCustomer(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le client</DialogTitle>
+          </DialogHeader>
+          {editCustomer && (
+            <form onSubmit={handleEditCustomer} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Nom *</Label>
+                <Input id="edit-name" name="name" defaultValue={editCustomer.name} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Téléphone</Label>
+                <Input id="edit-phone" name="phone" type="tel" defaultValue={editCustomer.phone || ""} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input id="edit-email" name="email" type="email" defaultValue={editCustomer.email || ""} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-notes">Notes</Label>
+                <Textarea id="edit-notes" name="notes" defaultValue={editCustomer.notes || ""} />
+              </div>
+              <Button type="submit" className="w-full" disabled={updateCustomer.isPending}>
+                Enregistrer
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer le client</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer <strong>{deleteTarget?.name}</strong> ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCustomer} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Card>
         <CardHeader>
           <CardTitle>Tous les clients</CardTitle>
@@ -99,6 +181,7 @@ export default function Customers() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Solde crédit</TableHead>
                   <TableHead>Inscrit le</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -144,6 +227,16 @@ export default function Customers() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {format(new Date(customer.created_at), "d MMM yyyy")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => setEditCustomer(customer)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(customer)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
