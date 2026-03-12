@@ -20,6 +20,8 @@ import { ProductTable } from "@/components/consumptions/ProductTable";
 import { AddProductDialog } from "@/components/consumptions/AddProductDialog";
 import { NewOrderDialog } from "@/components/consumptions/NewOrderDialog";
 import { OrderFilters, FilterPreset, getFilterDateRange } from "@/components/consumptions/OrderFilters";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 
 export default function Consumptions() {
