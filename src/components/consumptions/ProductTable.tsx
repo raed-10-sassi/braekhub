@@ -41,9 +41,9 @@ export function ProductTable({ products, categories, onUpdate, onDelete }: Produ
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="text-right">Price</TableHead>
+              <TableHead>Produit</TableHead>
+              <TableHead>Catégorie</TableHead>
+              <TableHead className="text-right">Prix</TableHead>
               <TableHead className="text-right">Stock</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
@@ -53,7 +53,7 @@ export function ProductTable({ products, categories, onUpdate, onDelete }: Produ
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  No products yet
+                  Aucun produit
                 </TableCell>
               </TableRow>
             ) : (
@@ -63,14 +63,14 @@ export function ProductTable({ products, categories, onUpdate, onDelete }: Produ
                   <TableCell>
                     <Badge variant="outline">{product.product_categories?.name}</Badge>
                   </TableCell>
-                  <TableCell className="text-right font-mono">${product.price.toFixed(2)}</TableCell>
+                  <TableCell className="text-right font-mono">{product.price.toFixed(2)} DT</TableCell>
                   <TableCell className="text-right">
                     <span className="flex items-center justify-end gap-1">
                       {product.stock_quantity <= 5 && product.stock_quantity > 0 && (
                         <AlertTriangle className="h-4 w-4 text-warning" />
                       )}
                       {product.stock_quantity === 0 ? (
-                        <Badge variant="destructive">Out of stock</Badge>
+                        <Badge variant="destructive">Rupture de stock</Badge>
                       ) : (
                         <span className={product.stock_quantity <= 5 ? "text-warning font-bold" : ""}>
                           {product.stock_quantity}
@@ -91,12 +91,12 @@ export function ProductTable({ products, categories, onUpdate, onDelete }: Produ
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete "{product.name}"?</AlertDialogTitle>
-                            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                            <AlertDialogTitle>Supprimer "{product.name}" ?</AlertDialogTitle>
+                            <AlertDialogDescription>Cette action est irréversible.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => onDelete(product.id)}>Delete</AlertDialogAction>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete(product.id)}>Supprimer</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>

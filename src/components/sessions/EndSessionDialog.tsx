@@ -28,10 +28,10 @@ interface EndSessionDialogProps {
 }
 
 const PAYMENT_METHODS = [
-  { value: "cash", label: "Cash" },
-  { value: "card", label: "Card" },
-  { value: "mobile", label: "Mobile Payment" },
-  { value: "credits", label: "Credits" },
+  { value: "cash", label: "Espèces" },
+  { value: "card", label: "Carte" },
+  { value: "mobile", label: "Paiement mobile" },
+  { value: "credits", label: "Crédits" },
 ];
 
 export function EndSessionDialog({
@@ -72,7 +72,6 @@ export function EndSessionDialog({
 
   const remaining = isCredits ? totalAmount : totalAmount - (parseFloat(paymentAmount) || 0);
 
-  // Find if any player is a registered customer
   const getPayerCustomer = (name: string): Customer | undefined => {
     return customers.find(c => c.name === name);
   };
@@ -83,28 +82,28 @@ export function EndSessionDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            End Session & Payment
+            Terminer la session & Paiement
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-            <span className="text-muted-foreground">Total Amount:</span>
-            <span className="text-xl font-bold">${totalAmount.toFixed(2)}</span>
+            <span className="text-muted-foreground">Montant total :</span>
+            <span className="text-xl font-bold">{totalAmount.toFixed(2)} DT</span>
           </div>
 
           <div className="space-y-2">
-            <Label>Who is paying?</Label>
+            <Label>Qui paie ?</Label>
             <Select value={selectedPayer} onValueChange={setSelectedPayer}>
               <SelectTrigger>
-                <SelectValue placeholder="Select payer..." />
+                <SelectValue placeholder="Sélectionner le payeur..." />
               </SelectTrigger>
               <SelectContent>
                 {playerNames.map((name) => (
                   <SelectItem key={name} value={name}>
                     {name}
                     {getPayerCustomer(name) && (
-                      <span className="text-muted-foreground ml-2">(Customer)</span>
+                      <span className="text-muted-foreground ml-2">(Client)</span>
                     )}
                   </SelectItem>
                 ))}
@@ -113,7 +112,7 @@ export function EndSessionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Payment Method</Label>
+            <Label>Mode de paiement</Label>
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger>
                 <SelectValue />
@@ -130,7 +129,7 @@ export function EndSessionDialog({
 
           {!isCredits && (
             <div className="space-y-2">
-              <Label htmlFor="payment">Payment Amount (0 - ${totalAmount.toFixed(2)})</Label>
+              <Label htmlFor="payment">Montant payé (0 - {totalAmount.toFixed(2)} DT)</Label>
               <Input
                 id="payment"
                 type="number"
@@ -145,7 +144,7 @@ export function EndSessionDialog({
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                Enter the amount the customer is paying now
+                Entrez le montant que le client paie maintenant
               </p>
             </div>
           )}
@@ -153,12 +152,12 @@ export function EndSessionDialog({
           {isCredits && (
             <div className="p-3 bg-accent/50 border border-border rounded-lg">
               <p className="text-sm font-medium text-foreground">
-                Full amount: ${totalAmount.toFixed(2)} will be added to credits
+                Montant total : {totalAmount.toFixed(2)} DT sera ajouté aux crédits
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {getPayerCustomer(selectedPayer) 
-                  ? `This will be added to ${selectedPayer}'s credit balance.`
-                  : `This will appear in the Credits page under ${selectedPayer}'s name.`
+                  ? `Ceci sera ajouté au solde crédit de ${selectedPayer}.`
+                  : `Ceci apparaîtra dans la page Crédits sous le nom de ${selectedPayer}.`
                 }
               </p>
             </div>
@@ -166,10 +165,10 @@ export function EndSessionDialog({
 
           {isCredits && (
             <div className="space-y-2">
-              <Label htmlFor="credit-notes">Comment (optional)</Label>
+              <Label htmlFor="credit-notes">Commentaire (optionnel)</Label>
               <Textarea
                 id="credit-notes"
-                placeholder="Add a note about this credit..."
+                placeholder="Ajouter une note sur ce crédit..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
@@ -180,12 +179,12 @@ export function EndSessionDialog({
           {!isCredits && remaining > 0.01 && (
             <div className="p-3 bg-accent/50 border border-border rounded-lg">
               <p className="text-sm font-medium text-foreground">
-                Remaining: ${remaining.toFixed(2)}
+                Reste : {remaining.toFixed(2)} DT
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {getPayerCustomer(selectedPayer) 
-                  ? `This will be added to ${selectedPayer}'s credit balance for future payment.`
-                  : "⚠️ Guest players cannot store credit. Only registered customers can have credit balance."
+                  ? `Ceci sera ajouté au solde crédit de ${selectedPayer} pour un paiement futur.`
+                  : "⚠️ Les joueurs invités ne peuvent pas stocker de crédit. Seuls les clients enregistrés peuvent avoir un solde crédit."
                 }
               </p>
             </div>
@@ -197,14 +196,14 @@ export function EndSessionDialog({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               className="flex-1"
               onClick={handleConfirm}
               disabled={!selectedPayer}
             >
-              Confirm & End
+              Confirmer & Terminer
             </Button>
           </div>
         </div>

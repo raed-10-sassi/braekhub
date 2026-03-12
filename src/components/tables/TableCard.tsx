@@ -16,8 +16,8 @@ import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import { useState, useEffect } from "react";
 
 const statusConfig: Record<TableStatus, { label: string; className: string }> = {
-  available: { label: "Available", className: "bg-success text-success-foreground" },
-  occupied: { label: "Occupied", className: "bg-destructive text-destructive-foreground" },
+  available: { label: "Disponible", className: "bg-success text-success-foreground" },
+  occupied: { label: "Occupée", className: "bg-destructive text-destructive-foreground" },
   maintenance: { label: "Maintenance", className: "bg-warning text-warning-foreground" },
 };
 
@@ -42,7 +42,7 @@ function ActiveTimer({ startTime, pausedAt, totalPausedSeconds }: { startTime: s
   const [, setTick] = useState(0);
 
   useEffect(() => {
-    if (pausedAt) return; // Don't tick when paused
+    if (pausedAt) return;
     const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
   }, [pausedAt]);
@@ -105,8 +105,8 @@ export function TableCard({
         {/* Price and status select */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold">${table.hourly_rate.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">per hour</p>
+            <p className="text-2xl font-bold">{table.hourly_rate.toFixed(2)} DT</p>
+            <p className="text-xs text-muted-foreground">par heure</p>
           </div>
           {!isOccupied && (
             <Select
@@ -118,7 +118,7 @@ export function TableCard({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="available">Disponible</SelectItem>
                 <SelectItem value="maintenance">Maintenance</SelectItem>
               </SelectContent>
             </Select>
@@ -136,7 +136,7 @@ export function TableCard({
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Users className="h-4 w-4" />
                 <span>
-                  {activeSession.player_count === 1 ? "Training" : activeSession.player_count}
+                  {activeSession.player_count === 1 ? "Entraînement" : activeSession.player_count}
                 </span>
               </div>
             </div>
@@ -153,7 +153,7 @@ export function TableCard({
           {isAvailable && (
             <Button className="flex-1" onClick={onStartSession}>
               <Play className="h-4 w-4 mr-2" />
-              Start
+              Démarrer
             </Button>
           )}
           {isOccupied && (
@@ -161,7 +161,7 @@ export function TableCard({
               {activeSession.paused_at ? (
                 <Button variant="outline" className="flex-1" onClick={onResumeSession}>
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  Resume
+                  Reprendre
                 </Button>
               ) : (
                 <Button variant="secondary" className="flex-1" onClick={onPauseSession}>
@@ -171,7 +171,7 @@ export function TableCard({
               )}
               <Button variant="destructive" className="flex-1" onClick={onEndSession}>
                 <Square className="h-4 w-4 mr-2" />
-                End
+                Terminer
               </Button>
             </>
           )}
@@ -181,7 +181,7 @@ export function TableCard({
               className="flex-1"
               onClick={() => onStatusChange("available")}
             >
-              Set Available
+              Rendre disponible
             </Button>
           )}
         </div>

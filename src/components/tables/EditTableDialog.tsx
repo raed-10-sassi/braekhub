@@ -38,21 +38,21 @@ export function EditTableDialog({ open, onOpenChange, table, onSave, onDelete, i
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); setConfirmDelete(false); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Table</DialogTitle>
+          <DialogTitle>Modifier la table</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Table Name</Label>
+            <Label htmlFor="edit-name">Nom de la table</Label>
             <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="edit-rate">Hourly Rate ($)</Label>
+            <Label htmlFor="edit-rate">Tarif horaire (DT)</Label>
             <Input id="edit-rate" type="number" step="0.01" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} required disabled={!isAdmin} />
             {!isAdmin && <p className="text-xs text-muted-foreground">Seul un admin peut modifier le tarif</p>}
           </div>
           <div className="flex gap-2">
             <Button type="submit" className="flex-1" disabled={isPending}>
-              Save Changes
+              Enregistrer
             </Button>
             <Button
               type="button"
@@ -60,7 +60,7 @@ export function EditTableDialog({ open, onOpenChange, table, onSave, onDelete, i
               onClick={handleDelete}
               disabled={isPending}
             >
-              {confirmDelete ? "Confirm Delete" : "Delete"}
+              {confirmDelete ? "Confirmer" : "Supprimer"}
             </Button>
           </div>
         </form>

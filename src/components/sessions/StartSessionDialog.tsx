@@ -68,7 +68,6 @@ export function StartSessionDialog({
     } else {
       newIsGuest[index] = false;
       newPlayers[index] = value;
-      // Clear guest input when selecting a customer
       const newGuestInputs = [...guestInputs];
       newGuestInputs[index] = "";
       setGuestInputs(newGuestInputs);
@@ -82,7 +81,6 @@ export function StartSessionDialog({
     newGuestInputs[index] = value;
     setGuestInputs(newGuestInputs);
     
-    // Update player name with guest input
     const newPlayers = [...players];
     newPlayers[index] = value;
     setPlayers(newPlayers);
@@ -92,13 +90,11 @@ export function StartSessionDialog({
     const validPlayers = players.slice(0, playerCount).filter(p => p.trim() !== "");
     if (validPlayers.length === 0) return;
     onStart(validPlayers, playerCount, effectiveRate);
-    // Reset state
     setPlayers(["", ""]);
     setGuestInputs(["", "", "", ""]);
     setIsGuest([false, false, false, false]);
     setPlayerCount(2);
   };
-
 
   const getSelectValue = (index: number) => {
     if (isGuest[index]) return "guest";
@@ -113,32 +109,32 @@ export function StartSessionDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Start Session - {tableName}
+            Démarrer session - {tableName}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-            <span className="text-sm text-muted-foreground">Rate:</span>
+            <span className="text-sm text-muted-foreground">Tarif :</span>
             <div className="text-right">
               {isTraining ? (
                 <>
-                  <span className="font-bold">${(hourlyRate / 2).toFixed(2)}/hr</span>
-                  <span className="text-xs text-muted-foreground ml-2 line-through">${hourlyRate.toFixed(2)}</span>
+                  <span className="font-bold">{(hourlyRate / 2).toFixed(2)} DT/h</span>
+                  <span className="text-xs text-muted-foreground ml-2 line-through">{hourlyRate.toFixed(2)} DT</span>
                 </>
               ) : (
-                <span className="font-bold">${hourlyRate.toFixed(2)}/hr</span>
+                <span className="font-bold">{hourlyRate.toFixed(2)} DT/h</span>
               )}
             </div>
           </div>
           {isTraining && (
             <div className="p-2 bg-accent/50 border border-border rounded-lg text-center">
-              <span className="text-sm font-medium">🎯 Training Mode — 50% Rate</span>
+              <span className="text-sm font-medium">🎯 Mode entraînement — Tarif 50%</span>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label>Number of Players</Label>
+            <Label>Nombre de joueurs</Label>
             <Select
               value={playerCount.toString()}
               onValueChange={handlePlayerCountChange}
@@ -147,15 +143,15 @@ export function StartSessionDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">1 Player (Training)</SelectItem>
-                <SelectItem value="2">2 Players (1v1)</SelectItem>
-                <SelectItem value="4">4 Players (2v2)</SelectItem>
+                <SelectItem value="1">1 Joueur (Entraînement)</SelectItem>
+                <SelectItem value="2">2 Joueurs (1v1)</SelectItem>
+                <SelectItem value="4">4 Joueurs (2v2)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-3">
-            <Label>Players</Label>
+            <Label>Joueurs</Label>
             {Array.from({ length: playerCount }).map((_, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -167,13 +163,13 @@ export function StartSessionDialog({
                     onValueChange={(value) => handlePlayerSelect(index, value)}
                   >
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select player..." />
+                      <SelectValue placeholder="Sélectionner un joueur..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="guest">
                         <span className="flex items-center gap-2">
                           <Plus className="h-4 w-4" />
-                          Guest Player
+                          Joueur invité
                         </span>
                       </SelectItem>
                       {customers.map((customer) => (
@@ -207,7 +203,7 @@ export function StartSessionDialog({
                 </div>
                 {isGuest[index] && (
                   <Input
-                    placeholder="Enter guest name..."
+                    placeholder="Nom de l'invité..."
                     value={guestInputs[index]}
                     onChange={(e) => handleGuestInput(index, e.target.value)}
                     className="ml-10"
@@ -223,14 +219,14 @@ export function StartSessionDialog({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               className="flex-1"
               onClick={handleSubmit}
               disabled={isPending || players.slice(0, playerCount).filter(p => p.trim()).length === 0}
             >
-              Start Session
+              Démarrer la session
             </Button>
           </div>
         </div>

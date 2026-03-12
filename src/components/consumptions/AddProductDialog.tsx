@@ -54,19 +54,19 @@ export function AddProductDialog({ open, onOpenChange, categories, onAdd, isPend
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Add Product
+            Ajouter un produit
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="prod-name">Product Name</Label>
-            <Input id="prod-name" placeholder="e.g. Coca Cola" value={name} onChange={(e) => setName(e.target.value)} required />
+            <Label htmlFor="prod-name">Nom du produit</Label>
+            <Input id="prod-name" placeholder="ex. Coca Cola" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="prod-category">Category</Label>
+            <Label htmlFor="prod-category">Catégorie</Label>
             <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category..." />
+                <SelectValue placeholder="Sélectionner une catégorie..." />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
@@ -75,22 +75,22 @@ export function AddProductDialog({ open, onOpenChange, categories, onAdd, isPend
               </SelectContent>
             </Select>
             {categories.length === 0 && (
-              <p className="text-xs text-destructive">Create a category first.</p>
+              <p className="text-xs text-destructive">Créez d'abord une catégorie.</p>
             )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="prod-price">Price ($)</Label>
+              <Label htmlFor="prod-price">Prix (DT)</Label>
               <Input id="prod-price" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="prod-stock">Initial Stock</Label>
+              <Label htmlFor="prod-stock">Stock initial</Label>
               <Input id="prod-stock" type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} required />
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" className="flex-1" disabled={isPending || !categoryId || !name.trim()}>Add Product</Button>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>Annuler</Button>
+            <Button type="submit" className="flex-1" disabled={isPending || !categoryId || !name.trim()}>Ajouter</Button>
           </div>
         </form>
       </DialogContent>

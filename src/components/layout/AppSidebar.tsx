@@ -30,15 +30,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const mainNavItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
   { title: "Tables", url: "/tables", icon: Grid3X3 },
-  { title: "Customers", url: "/customers", icon: Users },
-  { title: "Consumptions", url: "/consumptions", icon: Coffee },
+  { title: "Clients", url: "/customers", icon: Users },
+  { title: "Consommations", url: "/consumptions", icon: Coffee },
 ];
 
 const financeNavItems = [
-  { title: "Payments", url: "/payments", icon: CreditCard },
-  { title: "Credits", url: "/credits", icon: Receipt },
+  { title: "Paiements", url: "/payments", icon: CreditCard },
+  { title: "Crédits", url: "/credits", icon: Receipt },
 ];
 
 const adminNavItems = [
@@ -88,7 +88,7 @@ export function AppSidebar() {
 
       <SidebarContent className="px-2">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/50">Main</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/50">Principal</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
@@ -135,7 +135,7 @@ export function AppSidebar() {
           onClick={signOut}
         >
           <LogOut className="h-5 w-5" />
-          {!collapsed && <span>Sign Out</span>}
+          {!collapsed && <span>Déconnexion</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

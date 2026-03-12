@@ -68,30 +68,30 @@ export function StartVideoGameSessionDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gamepad2 className="h-5 w-5" />
-            Start Session - {gameName}
+            Démarrer session - {gameName}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-            <span className="text-sm text-muted-foreground">Rate:</span>
-            <span className="font-bold">${hourlyRate.toFixed(2)}/hr</span>
+            <span className="text-sm text-muted-foreground">Tarif :</span>
+            <span className="font-bold">{hourlyRate.toFixed(2)} DT/h</span>
           </div>
 
           <div className="space-y-2">
-            <Label>Player Name</Label>
+            <Label>Nom du joueur</Label>
             <Select
               value={isGuest ? "guest" : playerName || ""}
               onValueChange={handlePlayerSelect}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select player..." />
+                <SelectValue placeholder="Sélectionner un joueur..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="guest">
                   <span className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
-                    Guest Player
+                    Joueur invité
                   </span>
                 </SelectItem>
                 {customers.map((customer) => (
@@ -103,7 +103,7 @@ export function StartVideoGameSessionDialog({
             </Select>
             {isGuest && (
               <Input
-                placeholder="Enter guest name..."
+                placeholder="Nom de l'invité..."
                 value={guestInput}
                 onChange={(e) => setGuestInput(e.target.value)}
               />
@@ -112,14 +112,14 @@ export function StartVideoGameSessionDialog({
 
           <div className="flex gap-2 pt-2">
             <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
-              Cancel
+              Annuler
             </Button>
             <Button
               className="flex-1"
               onClick={handleSubmit}
               disabled={isPending || !currentName.trim()}
             >
-              Start Session
+              Démarrer la session
             </Button>
           </div>
         </div>
