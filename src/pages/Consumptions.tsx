@@ -42,6 +42,7 @@ export default function Consumptions() {
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
   const [filterPreset, setFilterPreset] = useState<FilterPreset>("all");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
