@@ -148,9 +148,34 @@ export function useOrders() {
     },
   });
 
+  const deleteOrder = useMutation({
+    mutationFn: async (id: string) => {
+      // Delete order items first
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .delete()
+        .eq("order_id", id);
+      if (itemsError) throw itemsError;
+
+      const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast({ title: "Commande supprimée", description: "La commande a été supprimée avec succès." });
+    },
+    onError: (error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
   return {
     orders: ordersQuery.data || [],
     isLoading: ordersQuery.isLoading,
     createOrder,
+    deleteOrder,
   };
 }

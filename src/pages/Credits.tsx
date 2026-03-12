@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { AlertCircle, DollarSign, Phone, User, MessageSquare, Plus, Banknote, History } from "lucide-react";
+import { AlertCircle, DollarSign, Phone, User, MessageSquare, Plus, Banknote, History, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +15,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useGuestCredits } from "@/hooks/useGuestCredits";
 import { useCustomerCreditNotes } from "@/hooks/useCustomerCreditNotes";
 import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import {
   Table,
@@ -29,12 +31,14 @@ export default function Credits() {
   const { createPayment } = usePayments();
   const { guestCredits } = useGuestCredits();
   const { creditNotes } = useCustomerCreditNotes();
-  const { withdrawals, createWithdrawal } = useCashWithdrawals();
+  const { withdrawals, createWithdrawal, deleteWithdrawal } = useCashWithdrawals();
+  const { isAdmin } = useAuth();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [selectedGuestName, setSelectedGuestName] = useState<string | null>(null);
   const [selectedGuestMaxAmount, setSelectedGuestMaxAmount] = useState<number>(0);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const customerCreditTotal = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
   const guestCreditTotal = guestCredits.reduce((sum, g) => sum + g.total_owed, 0);
@@ -396,6 +400,7 @@ export default function Credits() {
                   <TableHead>Date</TableHead>
                   <TableHead>Montant</TableHead>
                   <TableHead>Commentaire</TableHead>
+                  {isAdmin && <TableHead className="text-right">Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -412,6 +417,13 @@ export default function Credits() {
                     <TableCell className="text-muted-foreground">
                       {w.comment || <span className="text-muted-foreground/50">—</span>}
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(w.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -419,6 +431,30 @@ export default function Credits() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Voulez-vous vraiment supprimer cet enregistrement ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) deleteWithdrawal.mutate(deleteTarget);
+                setDeleteTarget(null);
+              }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

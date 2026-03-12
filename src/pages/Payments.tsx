@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download, ShoppingCart, ArrowDownCircle } from "lucide-react";
+import { DollarSign, Plus, CreditCard, Banknote, Smartphone, CalendarIcon, Download, ShoppingCart, ArrowDownCircle, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +16,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useOrders } from "@/hooks/useOrders";
 import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
+import { useAuth } from "@/contexts/AuthContext";
 import { format, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -45,15 +47,17 @@ interface UnifiedEntry {
 }
 
 export default function Payments() {
-  const { payments, createPayment } = usePayments();
+  const { payments, createPayment, deletePayment } = usePayments();
   const { customers, customersWithCredit } = useCustomers();
-  const { orders } = useOrders();
-  const { withdrawals } = useCashWithdrawals();
+  const { orders, deleteOrder } = useOrders();
+  const { withdrawals, deleteWithdrawal } = useCashWithdrawals();
+  const { isAdmin } = useAuth();
   const [newPaymentOpen, setNewPaymentOpen] = useState(false);
   const [filterFrom, setFilterFrom] = useState<Date | undefined>(undefined);
   const [filterTo, setFilterTo] = useState<Date | undefined>(undefined);
   const [filterFromTime, setFilterFromTime] = useState("00:00");
   const [filterToTime, setFilterToTime] = useState("23:59");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; type: "payment" | "order" | "withdrawal" } | null>(null);
 
   const buildDateWithTime = (date: Date, time: string) => {
     const [h, m] = time.split(":").map(Number);
@@ -420,6 +424,7 @@ export default function Payments() {
                   <TableHead>Montant</TableHead>
                   <TableHead>Méthode</TableHead>
                   <TableHead>Notes</TableHead>
+                  {isAdmin && <TableHead className="text-right">Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -465,6 +470,13 @@ export default function Payments() {
                       <TableCell className="text-muted-foreground max-w-[200px] truncate">
                         {entry.notes || "-"}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ id: entry.id, type: entry.type })}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
@@ -473,6 +485,33 @@ export default function Payments() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Voulez-vous vraiment supprimer cet enregistrement ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (!deleteTarget) return;
+                if (deleteTarget.type === "payment") deletePayment.mutate(deleteTarget.id);
+                else if (deleteTarget.type === "order") deleteOrder.mutate(deleteTarget.id);
+                else if (deleteTarget.type === "withdrawal") deleteWithdrawal.mutate(deleteTarget.id);
+                setDeleteTarget(null);
+              }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

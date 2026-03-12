@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, ShoppingCart, Package } from "lucide-react";
+import { Plus, ShoppingCart, Package, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +20,8 @@ import { ProductTable } from "@/components/consumptions/ProductTable";
 import { AddProductDialog } from "@/components/consumptions/AddProductDialog";
 import { NewOrderDialog } from "@/components/consumptions/NewOrderDialog";
 import { OrderFilters, FilterPreset, getFilterDateRange } from "@/components/consumptions/OrderFilters";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 
 export default function Consumptions() {
@@ -33,12 +35,14 @@ export default function Consumptions() {
     updateProduct,
     deleteProduct,
   } = useProducts();
-  const { orders, isLoading: ordersLoading, createOrder } = useOrders();
+  const { orders, isLoading: ordersLoading, createOrder, deleteOrder } = useOrders();
   const { customers } = useCustomers();
+  const { isAdmin } = useAuth();
 
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
   const [filterPreset, setFilterPreset] = useState<FilterPreset>("all");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
@@ -175,12 +179,13 @@ export default function Consumptions() {
                   <TableHead>Articles</TableHead>
                   <TableHead>Paiement</TableHead>
                   <TableHead className="text-right">Total</TableHead>
+                  {isAdmin && <TableHead className="text-right">Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredOrders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={isAdmin ? 6 : 5} className="text-center py-8 text-muted-foreground">
                       Aucune commande trouvée
                     </TableCell>
                   </TableRow>
@@ -206,6 +211,13 @@ export default function Consumptions() {
                       <TableCell className="text-right font-mono font-bold">
                         {order.total_amount.toFixed(2)} DT
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(order.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
@@ -242,6 +254,30 @@ export default function Consumptions() {
         onConfirm={(data) => createOrder.mutate(data)}
         isPending={createOrder.isPending}
       />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Voulez-vous vraiment supprimer cette commande ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) deleteOrder.mutate(deleteTarget);
+                setDeleteTarget(null);
+              }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
