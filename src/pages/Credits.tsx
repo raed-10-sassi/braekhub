@@ -15,6 +15,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useGuestCredits } from "@/hooks/useGuestCredits";
 import { useCustomerCreditNotes } from "@/hooks/useCustomerCreditNotes";
 import { useCashWithdrawals } from "@/hooks/useCashWithdrawals";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import {
   Table,
