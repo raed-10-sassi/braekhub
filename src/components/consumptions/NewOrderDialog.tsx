@@ -251,12 +251,33 @@ export function NewOrderDialog({ open, onOpenChange, products, customers, onConf
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>Nom du client (optionnel)</Label>
-                <Input
-                  placeholder="Invité"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
+                <Label>Client (optionnel)</Label>
+                <Select value={customerId} onValueChange={(val) => {
+                  setCustomerId(val);
+                  const c = customers.find((c) => c.id === val);
+                  if (c) setCustomerName(c.name);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un client..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!customerId && (
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Ou saisir un nom</Label>
+                    <Input
+                      placeholder="Invité"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
