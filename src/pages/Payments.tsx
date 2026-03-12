@@ -47,10 +47,11 @@ interface UnifiedEntry {
 }
 
 export default function Payments() {
-  const { payments, createPayment } = usePayments();
+  const { payments, createPayment, deletePayment } = usePayments();
   const { customers, customersWithCredit } = useCustomers();
-  const { orders } = useOrders();
-  const { withdrawals } = useCashWithdrawals();
+  const { orders, deleteOrder } = useOrders();
+  const { withdrawals, deleteWithdrawal } = useCashWithdrawals();
+  const { isAdmin } = useAuth();
   const [newPaymentOpen, setNewPaymentOpen] = useState(false);
   const [filterFrom, setFilterFrom] = useState<Date | undefined>(undefined);
   const [filterTo, setFilterTo] = useState<Date | undefined>(undefined);
