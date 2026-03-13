@@ -105,18 +105,13 @@ export default function Credits() {
 
     if (newCreditType === "customer") {
       const customerId = formData.get("credit_customer_id") as string;
-      const customer = customers.find(c => c.id === customerId);
-      if (customer) {
-        // Add to customer credit_balance
-        createPayment.mutate({
-          customer_id: customerId,
-          amount,
-          payment_method: "credits",
-          notes,
-        });
-        // Also update the credit_balance on the customer
-        const { addCreditToCustomer } = usePayments();
-      }
+      addCreditToCustomer.mutate({ customerId, amount });
+      createPayment.mutate({
+        customer_id: customerId,
+        amount,
+        payment_method: "credits",
+        notes,
+      });
     } else {
       const name = formData.get("credit_name") as string;
       createPayment.mutate({
