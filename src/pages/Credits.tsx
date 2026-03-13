@@ -97,6 +97,38 @@ export default function Credits() {
     setPaymentOpen(true);
   };
 
+  const handleNewCredit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const amount = parseFloat(formData.get("credit_amount") as string);
+    const notes = (formData.get("credit_notes") as string) || "Crédit manuel";
+
+    if (newCreditType === "customer") {
+      const customerId = formData.get("credit_customer_id") as string;
+      const customer = customers.find(c => c.id === customerId);
+      if (customer) {
+        // Add to customer credit_balance
+        createPayment.mutate({
+          customer_id: customerId,
+          amount,
+          payment_method: "credits",
+          notes,
+        });
+        // Also update the credit_balance on the customer
+        const { addCreditToCustomer } = usePayments();
+      }
+    } else {
+      const name = formData.get("credit_name") as string;
+      createPayment.mutate({
+        payer_name: name,
+        amount,
+        payment_method: "credits",
+        notes,
+      });
+    }
+    setNewCreditOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
