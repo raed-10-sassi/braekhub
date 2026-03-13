@@ -44,7 +44,8 @@ export function StartSessionDialog({
   const [guestInputs, setGuestInputs] = useState<string[]>(["", "", "", ""]);
   const [isGuest, setIsGuest] = useState<boolean[]>([false, false, false, false]);
   const isTraining = playerCount === 1;
-  const effectiveRate = isTraining ? hourlyRate / 2 : hourlyRate;
+  const isVip = tableName.toLowerCase().includes("vip");
+  const effectiveRate = isTraining ? (isVip ? 10 : 9) : hourlyRate;
 
   const handlePlayerCountChange = (count: string) => {
     const newCount = parseInt(count) as 1 | 2 | 4;
