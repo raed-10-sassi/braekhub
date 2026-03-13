@@ -28,17 +28,19 @@ import {
 
 export default function Credits() {
   const { customersWithCredit, customers } = useCustomers();
-  const { createPayment } = usePayments();
+  const { createPayment, addCreditToCustomer } = usePayments();
   const { guestCredits } = useGuestCredits();
   const { creditNotes } = useCustomerCreditNotes();
   const { withdrawals, createWithdrawal, deleteWithdrawal } = useCashWithdrawals();
   const { isAdmin } = useAuth();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
+  const [newCreditOpen, setNewCreditOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [selectedGuestName, setSelectedGuestName] = useState<string | null>(null);
   const [selectedGuestMaxAmount, setSelectedGuestMaxAmount] = useState<number>(0);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [newCreditType, setNewCreditType] = useState<"guest" | "customer">("guest");
 
   const customerCreditTotal = customersWithCredit.reduce((sum, c) => sum + c.credit_balance, 0);
   const guestCreditTotal = guestCredits.reduce((sum, g) => sum + g.total_owed, 0);
@@ -95,6 +97,33 @@ export default function Credits() {
     setPaymentOpen(true);
   };
 
+  const handleNewCredit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const amount = parseFloat(formData.get("credit_amount") as string);
+    const notes = (formData.get("credit_notes") as string) || "Crédit manuel";
+
+    if (newCreditType === "customer") {
+      const customerId = formData.get("credit_customer_id") as string;
+      addCreditToCustomer.mutate({ customerId, amount });
+      createPayment.mutate({
+        customer_id: customerId,
+        amount,
+        payment_method: "credits",
+        notes,
+      });
+    } else {
+      const name = formData.get("credit_name") as string;
+      createPayment.mutate({
+        payer_name: name,
+        amount,
+        payment_method: "credits",
+        notes,
+      });
+    }
+    setNewCreditOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -102,7 +131,72 @@ export default function Credits() {
           <h1 className="text-3xl font-bold tracking-tight">Crédits</h1>
           <p className="text-muted-foreground">Soldes clients impayés & retraits de caisse</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {/* New Credit Button */}
+          <Dialog open={newCreditOpen} onOpenChange={(open) => {
+            setNewCreditOpen(open);
+            if (!open) setNewCreditType("guest");
+          }}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Nouveau crédit
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  Ajouter un crédit manuel
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleNewCredit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={newCreditType} onValueChange={(v) => setNewCreditType(v as "guest" | "customer")}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="guest">Invité (nom libre)</SelectItem>
+                      <SelectItem value="customer">Client existant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {newCreditType === "guest" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="credit_name">Nom</Label>
+                    <Input id="credit_name" name="credit_name" placeholder="Nom de la personne" required />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label>Client</Label>
+                    <Select name="credit_customer_id" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customers.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="credit_amount">Montant (DT)</Label>
+                  <Input id="credit_amount" name="credit_amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="credit_notes">Commentaire</Label>
+                  <Textarea id="credit_notes" name="credit_notes" placeholder="Raison du crédit..." rows={2} />
+                </div>
+                <Button type="submit" className="w-full" disabled={createPayment.isPending}>
+                  Ajouter le crédit
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
           {/* Add Cash Withdrawal Button */}
           <Dialog open={withdrawalOpen} onOpenChange={setWithdrawalOpen}>
             <DialogTrigger asChild>
