@@ -23,14 +23,14 @@ export function useGuestCredits() {
 
       if (ordersError) throw ordersError;
 
-      // Get session credit debts (payments with payment_method "credits" and notes starting with "Session credit")
+      // Get all credit debts (session credits, manual credits, etc.) — exclude repayment notes
       const { data: sessionCredits, error: sessionError } = await supabase
         .from("payments")
         .select("payer_name, amount, created_at, notes")
         .eq("payment_method", "credits")
         .is("customer_id", null)
         .not("payer_name", "is", null)
-        .or("notes.like.Session credit%,notes.like.Crédit de session%,notes.like.Reste impayé%");
+        .not("notes", "in", '("Guest credit payment","Paiement crédit invité")');
 
       if (sessionError) throw sessionError;
 
