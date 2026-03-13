@@ -28,7 +28,7 @@ import {
 
 export default function Credits() {
   const { customersWithCredit, customers } = useCustomers();
-  const { createPayment } = usePayments();
+  const { createPayment, addCreditToCustomer } = usePayments();
   const { guestCredits } = useGuestCredits();
   const { creditNotes } = useCustomerCreditNotes();
   const { withdrawals, createWithdrawal, deleteWithdrawal } = useCashWithdrawals();
