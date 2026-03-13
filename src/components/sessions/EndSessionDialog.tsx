@@ -184,7 +184,7 @@ export function EndSessionDialog({
               <p className="text-xs text-muted-foreground mt-1">
                 {getPayerCustomer(selectedPayer) 
                   ? `Ceci sera ajouté au solde crédit de ${selectedPayer} pour un paiement futur.`
-                  : "⚠️ Les joueurs invités ne peuvent pas stocker de crédit. Seuls les clients enregistrés peuvent avoir un solde crédit."
+                  : `Ceci sera enregistré comme crédit pour ${selectedPayer} dans la page Crédits.`
                 }
               </p>
             </div>
