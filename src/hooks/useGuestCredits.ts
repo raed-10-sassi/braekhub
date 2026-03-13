@@ -30,7 +30,7 @@ export function useGuestCredits() {
         .eq("payment_method", "credits")
         .is("customer_id", null)
         .not("payer_name", "is", null)
-        .like("notes", "Session credit%");
+        .or("notes.like.Session credit%,notes.like.Crédit de session%,notes.like.Reste impayé%");
 
       if (sessionError) throw sessionError;
 
