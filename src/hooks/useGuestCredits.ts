@@ -40,7 +40,7 @@ export function useGuestCredits() {
         .select("payer_name, amount")
         .is("customer_id", null)
         .not("payer_name", "is", null)
-        .eq("notes", "Guest credit payment");
+        .in("notes", ["Guest credit payment", "Paiement crédit invité"]);
 
       if (paymentsError) throw paymentsError;
 
