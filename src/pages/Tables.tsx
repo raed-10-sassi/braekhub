@@ -169,8 +169,27 @@ export default function Tables() {
           payment_method: paymentMethod,
         });
       }
-      if (remaining > 0 && customerId) {
-        addCreditToCustomer.mutate({ customerId, amount: remaining });
+      if (remaining > 0) {
+        if (customerId) {
+          addCreditToCustomer.mutate({ customerId, amount: remaining });
+          createPayment.mutate({
+            session_id: endSessionData.sessionId,
+            customer_id: customerId,
+            payer_name: payerName,
+            amount: remaining,
+            payment_method: "credits",
+            notes: notes || "Reste impayé de session",
+          });
+        } else {
+          // Guest: record as credit payment so it shows in Credits page
+          createPayment.mutate({
+            session_id: endSessionData.sessionId,
+            payer_name: payerName,
+            amount: remaining,
+            payment_method: "credits",
+            notes: notes || "Reste impayé de session",
+          });
+        }
       }
     }
 
